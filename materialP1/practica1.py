@@ -41,15 +41,15 @@ def procesa_paquete(us,header,data):
 	logging.info('Nuevo paquete de {} bytes capturado a las {}.{}'.format(header.len,header.ts.tv_sec,header.ts.tv_usec))
 	num_paquete += 1
 
-	#NOTA: falta modificar la fecha del paquete capturado, sumarle 30 min
-	header.ts.tv_sec += TIME_OFFSET
-
 	#TODO imprimir los N primeros bytes
 	d = data[0: args.nbytes]
-	print('Los %d primeros bytes del paquete capturado:' % (args.nbytes))
+	print('Los %d primeros bytes del paquete no.%d:' % (args.nbytes, num_paquete))
 
 	#NOTA: bytes del paquete capturado expresados en hexadecimal, con 2 digitos por Byte(separados por espacios en blanco)
 	print('\t' + ' '.join(['{:02x}'.format(x) for x in d]) + '\n')
+
+	#NOTA: modificamos la fecha del paquete capturado, sumandole 30 min (30*60 segundos)
+	header.ts.tv_sec += TIME_OFFSET
 	
 	#Escribir el tráfico al fichero de captura con el offset temporal
 	if args.interface:
