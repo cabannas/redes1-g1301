@@ -1,0 +1,23 @@
+
+Autores:
+* Daniel Alexander Cabañas Gonzalez
+* Xingxin Chen Zhan
+
+
+Comentarios:
+
+
+
+Descripción de ficheros:
+
+
+
+Sección:
+* Normativa de entrega cumplida en su totalidad: 
+* Contar paquetes de una traza: 
+* Contar paquetes de la interfaz de red: 
+* Almacenar en una traza el tráfico capturado en vivo: 
+* Modificar fecha correctamente: 
+* Imprimir los N primeros bytes de un paquete y validarlo con Wireshark (captura de
+pantalla): 
+* Cuestionario "Ejercicios de captura de tráfico": 

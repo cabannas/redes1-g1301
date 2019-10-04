@@ -26,8 +26,6 @@ TO_MS = 10
 num_paquete = 0
 TIME_OFFSET = 30*60
 
-LINKTYPE = DLT_EN10MB
-
 
 def signal_handler(nsignal,frame):
 	logging.info('Control C pulsado')
@@ -40,13 +38,36 @@ def procesa_paquete(us,header,data):
 	
 	logging.info('Nuevo paquete de {} bytes capturado a las {}.{}'.format(header.len,header.ts.tv_sec,header.ts.tv_usec))
 	num_paquete += 1
-
+	
 	#TODO imprimir los N primeros bytes
-	d = data[0: args.nbytes]
-	print('Los %d primeros bytes del paquete no.%d:' % (args.nbytes, num_paquete))
+	N = args.nbytes
 
-	#NOTA: bytes del paquete capturado expresados en hexadecimal, con 2 digitos por Byte(separados por espacios en blanco)
-	print('\t' + ' '.join(['{:02x}'.format(x) for x in d]) + '\n')
+	if N < header.len:
+		print('Los %d primeros bytes del paquete no.%d:' % (N, num_paquete))
+
+	elif N == header.len:
+		print('Los bytes del paquete capturado coinciden con el parámetro --nbytes')
+		print('Los %d bytes del paquete no.%d:' % (N, num_paquete))
+
+	else:
+		N = header.len
+		print('No hay suficientes bytes para imprimir (--nbytes = %d)' % (args.nbytes))
+		print('Los %d bytes del paquete no.%d:' % (N, num_paquete))
+
+	d = data[0: N]
+	
+	#NOTA: calculamos el numero de lineas que se van a necesitar (cada linea va a ocupar como mucho 16 bytes)
+	lineas = int(len(d)/16) + 1
+
+	for i in range(0, lineas):
+		#NOTA: coge los bytes de 16 en 16 
+		l = d[16*i: 16*(i+1)]
+
+		#NOTA: bytes del paquete capturado expresados en hexadecimal, con 2 digitos por Byte (separados por espacios en blanco)
+		print('\t' + ' '.join(['{:02x}'.format(b) for b in l]))
+
+	print('\n')
+
 
 	#NOTA: modificamos la fecha del paquete capturado, sumandole 30 min (30*60 segundos)
 	header.ts.tv_sec += TIME_OFFSET
@@ -54,6 +75,7 @@ def procesa_paquete(us,header,data):
 	#Escribir el tráfico al fichero de captura con el offset temporal
 	if args.interface:
 		pcap_dump(pdumper, header, data)
+
 
 
 if __name__ == "__main__":
@@ -100,9 +122,9 @@ if __name__ == "__main__":
 	
 
 	#TODO abrir un dumper para volcar el tráfico (si se ha especificado interfaz)
-	
+
 	if args.interface:
-		descr2 = pcap_open_dead(LINKTYPE, ETH_FRAME_MAX)
+		descr2 = pcap_open_dead(DLT_EN10MB, ETH_FRAME_MAX)
 		if descr2 is None:
 			logging.error('Error al abrir descriptor de archivo pcap')
 
@@ -113,15 +135,12 @@ if __name__ == "__main__":
 			logging.error('Error al crear objeto dumper para guardar los paquetes')
 
 
-	'''
-	#NOTA: tiempo actual UNIX en segundos
+
 	ts = time.time()
-	print(ts)
-	
-	#NOTA: fecha completa
+	print('Tiempo actual UNIX en segundos: ' + str(ts))	
 	st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-	print(st)
-	'''
+	print('Fecha actual: ' + str(st) + '\n\n')
+	
 
 	ret = pcap_loop(handle,50,procesa_paquete,None)
 	if ret == -1:
@@ -132,16 +151,6 @@ if __name__ == "__main__":
 		logging.debug('No mas paquetes o limite superado')
 	logging.info('{} paquetes procesados'.format(num_paquete))
 	
-	'''
-	if pdumper is not None:
-		pcap_dump_close(pdumper)
-	
-	if handle is not None:
-		pcap_close(handle)
-
-	if descr2 is not None:
-		pcap_close(descr2)
-	'''
 
 	#TODO si se ha creado un dumper cerrarlo
 
