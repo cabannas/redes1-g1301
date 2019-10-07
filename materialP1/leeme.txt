@@ -1,7 +1,9 @@
 
 Autores:
+
 * Daniel Alexander Cabañas Gonzalez
 * Xingxin Chen Zhan
+
 
 
 Comentarios:
@@ -10,14 +12,20 @@ Comentarios:
 
 Descripción de ficheros:
 
+* captura.ens33.1570479340.pcap = tráfico capturado en vivo (33 paquetes en total) respecto al ejercicio Libpcap.
+
 
 
 Sección:
-* Normativa de entrega cumplida en su totalidad: 
-* Contar paquetes de una traza: 
-* Contar paquetes de la interfaz de red: 
-* Almacenar en una traza el tráfico capturado en vivo: 
-* Modificar fecha correctamente: 
+
+* Normativa de entrega cumplida en su totalidad: Realizado: Varias relecturas del enunciado.
+* Contar paquetes de una traza: Realizado: Se ha comprobado que el número de paquete que muestra nuestro programa
+(33 paquetes) coincide con el que indica Wireshark.
+* Contar paquetes de la interfaz de red: Realizado: Comprobado con el programa Wireshark.
+* Almacenar en una traza el tráfico capturado en vivo: Realizado: Se ha comprobado que todos los bytes de
+la traza capturado coinciden con el que indica Wireshark.
+* Modificar fecha correctamente: Realizado: Se ha comprobado que la fecha de los paquetes capturados 
+ha sumado correctamente 30*60 segundos más.
 * Imprimir los N primeros bytes de un paquete y validarlo con Wireshark (captura de
-pantalla): 
-* Cuestionario "Ejercicios de captura de tráfico": 
+pantalla): Realizado: Se imprimen correctamente los 32 primeros bytes.
+* Cuestionario "Ejercicios de captura de tráfico": Parcialmente-Realizado

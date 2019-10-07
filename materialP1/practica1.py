@@ -151,11 +151,11 @@ if __name__ == "__main__":
 	logging.info('{} paquetes procesados'.format(num_paquete))
 
 	# TODO si se ha creado un dumper cerrarlo
-    pcap_close(handle)
-
-    if args.interface:
-        pcap_dump_close(pdumper)
-    	pcap_close(descr2)
+	pcap_close(handle)
+	
+	if args.interface:
+		pcap_dump_close(pdumper)
+		pcap_close(descr2)
 
 	# if args.interface:
 	# 	pcap_dump_close(pdumper)
