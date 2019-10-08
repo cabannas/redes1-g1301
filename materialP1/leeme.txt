@@ -7,8 +7,8 @@ Autores:
 
 Descripción de ficheros:
 
-* captura.ens33.1570479340.pcap = tráfico capturado en vivo (33 paquetes en total) respecto al ejercicio Libpcap.
-* practica1.pcap = tráfico capturado traza generada respecto al ejercicio Wireshark.
+* captura.ens33.1570479340.pcap = tráfico capturado en vivo respecto al ejercicio Libpcap.
+* practica1.pcap = traza generada respecto al ejercicio Wireshark.
 
 
 Sección:
@@ -23,4 +23,4 @@ la traza capturado coinciden con el que indica Wireshark.
 ha sumado correctamente 30*60 segundos más.
 * Imprimir los N primeros bytes de un paquete y validarlo con Wireshark (captura de
 pantalla): Realizado: Se imprimen correctamente los 32 primeros bytes.
-* Cuestionario "Ejercicios de captura de tráfico": Realizado
+* Cuestionario "Ejercicios de captura de tráfico": Realizado: Comprobado con el fichero practica1.pdf
