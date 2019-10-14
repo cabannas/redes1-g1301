@@ -150,6 +150,7 @@ def startEthernetLevel(interface):
     global macAddress,handle,levelInitialized,recvThread
     errbuf = bytearray()
     handle = None
+    levelInitialized = False
     logging.debug('Función no implementada')
     #TODO: implementar aquí la inicialización de la interfaz y de las variables globales
     if levelInitialized:
@@ -170,6 +171,7 @@ def startEthernetLevel(interface):
     recvThread.start()
     return 0
 
+
 def stopEthernetLevel():
     global macAddress,handle,levelInitialized,recvThread
     '''
@@ -183,7 +185,15 @@ def stopEthernetLevel():
         Retorno: 0 si todo es correcto y -1 en otro caso
     '''
     logging.debug('Función no implementada')
+    
+    if recvThread is None or handle is None:
+        return -1
+
+    recvThread.stop()
+    pcap_close(handle)
+    levelInitialized = False
     return 0
+
 
 def sendEthernetFrame(data,len,etherType,dstMac):
     '''
@@ -204,3 +214,26 @@ def sendEthernetFrame(data,len,etherType,dstMac):
     '''
     global macAddress,handle
     logging.debug('Función no implementada')
+
+    # trama = cabecera + payload
+    # cabecera  = macAddress + dstMac + etherType
+    # payload   = data
+
+    #TODO: ???
+    trama = struct.pack('!6s6s2s', macAddress + dstMac + etherType) + data
+    size  = 6 + 6 + 2 + len
+
+    if size < ETH_FRAME_MIN:
+        pad_len = ETH_FRAME_MIN - size
+        trama += struct.pack('!B', 0) * pad_len
+
+    elif size > ETH_FRAME_MAX:
+        return -1
+
+
+    ret = pcap_inject(handle, trama, size)
+    if ret == -1:
+        logging.error('Error al enviar la trama')
+        return -1
+
+    return 0
