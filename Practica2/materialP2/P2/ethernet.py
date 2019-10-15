@@ -74,17 +74,12 @@ def process_Ethernet_frame(us,header,data):
     EthType = data[12:14]
     print("VALOR ETHERTYPE: " + EthType)
 
-    if ownmac == macDst:
+    if ownmac == macDst or broadcastAddr == macDst:
         callbackFun = upperProtos.get(EthType)
 
         if callbackFun = -1:
             return
         callbackFun(us, header, data[14:], macOrg)
-    elif ownmac == broadcastAddr:
-        #TODO: ver que hacer si broadcast
-        return
-    else:
-        return
 
 
     #TODO: Implementar aquí el código que procesa una trama Ethernet en recepción
