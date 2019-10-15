@@ -12,6 +12,8 @@ import struct
 from binascii import hexlify
 import struct
 import threading
+import  uuid
+
 #Tamaño máximo de una trama Ethernet (para las prácticas)
 ETH_FRAME_MAX = 1514
 #Tamaño mínimo de una trama Ethernet
@@ -62,8 +64,32 @@ def process_Ethernet_frame(us,header,data):
             -Ninguno
     '''
     logging.debug('Trama nueva. Función no implementada')
+    global ownmac
+    ownmac = (hex(uuid.getnode()))
+    print("DIRECCION MAC PROPIA: " + ownmac)
+    macDst = data[0:6]
+    print("DIRECCION MAC DESTINO: " + macDst)
+    macOrg = data[6:12]
+    print("DIRECCION MAC ORIGEN: " + macOrg)
+    EthType = data[12:14]
+    print("VALOR ETHERTYPE: " + EthType)
+
+    if ownmac == macDst:
+        callbackFun = upperProtos.get(EthType)
+
+        if callbackFun = -1:
+            return
+        callbackFun(us, header, data[14:], macOrg)
+    elif ownmac == broadcastAddr:
+        #TODO: ver que hacer si broadcast
+        return
+    else:
+        return
+
+
     #TODO: Implementar aquí el código que procesa una trama Ethernet en recepción
-    
+
+
 
 
 def process_frame(us,header,data):
@@ -185,7 +211,7 @@ def stopEthernetLevel():
         Retorno: 0 si todo es correcto y -1 en otro caso
     '''
     logging.debug('Función no implementada')
-    
+
     if recvThread is None or handle is None:
         return -1
 
@@ -223,7 +249,7 @@ def sendEthernetFrame(data,len,etherType,dstMac):
         return -1
 
     #TODO: ???
-    trama = struct.pack('!6s6s2s', macAddress + dstMac + etherType) + data
+    trama = struct.pack('!6s6s2s', dstMac + macAddress + etherType) + data
     size  = 14 + len
 
     if size < ETH_FRAME_MIN:
