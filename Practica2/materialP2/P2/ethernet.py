@@ -219,9 +219,12 @@ def sendEthernetFrame(data,len,etherType,dstMac):
     # cabecera  = macAddress + dstMac + etherType
     # payload   = data
 
+    if len(macAddress) != 6 or len(dstMac) != 6 or len(etherType) != 2:
+        return -1
+
     #TODO: ???
     trama = struct.pack('!6s6s2s', macAddress + dstMac + etherType) + data
-    size  = 6 + 6 + 2 + len
+    size  = 14 + len
 
     if size < ETH_FRAME_MIN:
         pad_len = ETH_FRAME_MIN - size
