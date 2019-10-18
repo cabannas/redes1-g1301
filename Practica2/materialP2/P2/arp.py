@@ -122,7 +122,17 @@ def processARPReply(data, MAC):
     """
     global requestedIP, resolvedMAC, awaitingResponse, cache
     logging.debug('Función no implentada')
+    
     # TODO implementar aquí
+    srcMac = data
+    if srcMac != MAC:
+        return
+
+    srcIp   = 
+    dstMac  = 
+    dstIp   = 
+    
+
 
 
 def createARPRequest(ip):
@@ -176,7 +186,22 @@ def process_arp_frame(us, header, data, srcMac):
         Retorno: Ninguno
     """
     logging.debug('Función no implementada')
+
     # TODO implementar aquí
+    if '0x0806' in upperProtos == False:
+        return
+
+    arpHeader = data[0: ARP_HLEN]
+    opcode    = [ARP_HLEN: ARP_HLEN+2]
+
+    if opcode == 0x0001:
+        processARPRequest(data, srcMac)
+
+    elif opcode == 0x0002:
+        processARPReply(data, srcMac)
+
+    return
+
 
 
 def initARP(interface):
@@ -191,6 +216,15 @@ def initARP(interface):
     global myIP, myMAC, arpInitialized
     logging.debug('Función no implementada')
     # TODO implementar aquí
+
+    registerCallback('process_arp_frame', '0x0806')
+    myMAC = getHwAddr(interface)
+    myIP  = getIP(interface)
+
+    # TODO falta realizar la petición ARP gratuita
+
+
+    arpInitialized = True
     return 0
 
 
