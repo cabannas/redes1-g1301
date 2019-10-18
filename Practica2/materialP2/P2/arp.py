@@ -123,15 +123,29 @@ def processARPReply(data, MAC):
     global requestedIP, resolvedMAC, awaitingResponse, cache
     logging.debug('Función no implentada')
     
+
     # TODO implementar aquí
-    srcMac = data
+    srcMac = data[8: 14]    # Sender Eth(6 Bytes)
     if srcMac != MAC:
         return
 
-    srcIp   = 
-    dstMac  = 
-    dstIp   = 
+    srcIp   = data[14: 18]  # Sender IP (4 Bytes)
+    dstMac  = data[18: 24]  # Target Eth(6 Bytes)
+    dstIp   = data[24: 28]  # Target IP (4 Bytes)
     
+    ownIp   = socket.gethostbyname(socket.gethostname())
+    if dstIp != ownIp:      
+        return              # No es la propia IP
+
+    if srcIp != requestedIP:
+        return              # La IP origen no corresponde con la solicitada
+    
+    resolvedMAC  = srcMac
+    cache[dstIp] = dstMac
+
+    awaitingResponse = False
+    requestedIP      = None
+    return
 
 
 
@@ -191,9 +205,11 @@ def process_arp_frame(us, header, data, srcMac):
     if '0x0806' in upperProtos == False:
         return
 
-    arpHeader = data[0: ARP_HLEN]
-    opcode    = [ARP_HLEN: ARP_HLEN+2]
+    arpHeader = data[0: ARP_HLEN]   # 6 Bytes
+    if arpHeader != ARPHeader:
+        return
 
+    opcode = [ARP_HLEN: ARP_HLEN+2] # Opcode (2 Bytes)
     if opcode == 0x0001:
         processARPRequest(data, srcMac)
 
@@ -221,8 +237,8 @@ def initARP(interface):
     myMAC = getHwAddr(interface)
     myIP  = getIP(interface)
 
-    # TODO falta realizar la petición ARP gratuita
-
+    if ARPResolution(myIP) is not None:
+        return -1
 
     arpInitialized = True
     return 0
