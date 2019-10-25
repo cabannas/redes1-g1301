@@ -65,20 +65,24 @@ def process_Ethernet_frame(us, header, data):
             -Ninguno
     """
     logging.debug('Trama nueva. Función no implementada')
-    global ownmac
+    global ownmac, upperProtos
     ownmac = (hex(uuid.getnode()))
-    print("DIRECCION MAC PROPIA: " + ownmac)
+    print("DIRECCION MAC PROPIA: " + str(ownmac))
     macDst = data[0:6]
-    print("DIRECCION MAC DESTINO: " + macDst)
+    print("DIRECCION MAC DESTINO: " + str(macDst))
     macOrg = data[6:12]
-    print("DIRECCION MAC ORIGEN: " + macOrg)
+    print("DIRECCION MAC ORIGEN: " + str(macOrg))
     EthType = data[12:14]
-    print("VALOR ETHERTYPE: " + EthType)
+    print("VALOR ETHERTYPE: " + str(EthType))
+
+    print("DATA:")
+    print(data)
 
     if ownmac == macDst or broadcastAddr == macDst:
-        callbackFun = upperProtos.get(EthType)
+        print(upperProtos)
+        callbackFun = upperProtos.get(str(EthType))
 
-        if callbackFun == -1:
+        if callbackFun is None:
             return
         callbackFun(us, header, data[14:], macOrg)
 
@@ -147,7 +151,7 @@ def registerCallback(callback_func, ethertype):
     # upperProtos es el diccionario que relaciona función de callback y ethertype
     logging.debug('Función no implementada')
 
-    upperProtos[etherType] = callback_func
+    upperProtos[ethertype] = callback_func
 
 
 def startEthernetLevel(interface):
@@ -236,10 +240,10 @@ def sendEthernetFrame(data, len, etherType, dstMac):
     # cabecera  = macAddress + dstMac + etherType
     # payload   = data
 
-    if len(macAddress) != 6 or len(dstMac) != 6 or len(etherType) != 2:
-        return -1
+    #if len(macAddress) != 6 or len(dstMac) != 6 or len(etherType) != 2:
+    #    return -1
 
-    trama = struct.pack('!6s6s2s', dstMac + macAddress + etherType) + data
+    trama = struct.pack('!6s6s2s', bytes(dstMac), bytes(macAddress), bytes(etherType)) + data
     size = 14 + len
 
     if size < ETH_FRAME_MIN:

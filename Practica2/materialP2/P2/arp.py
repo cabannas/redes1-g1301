@@ -177,15 +177,15 @@ def createARPRequest(ip):
     logging.debug('Función no implementada')
     # TODO implementar aqui
 
-    frame = struct.pack('!2s', 0x0001)  # Hardware Type (2 Bytes) Ethernet
-    frame += struct.pack('!2s', 0x0800)  # Protocol Type (2 Bytes) IP
-    frame += struct.pack('!1s', 0x6)  # Hardware Size (1 Byte) Ethernet
-    frame += struct.pack('!1s', 0x4)  # Protocol Size (1 Byte) IP
-    frame += struct.pack('!2s', 0x0001)  # Opcode (2 Bytes) Request
-    frame += struct.pack('!6s', myMAC)  # Sender Eth (6 Bytes)
-    frame += struct.pack('!4s', myIP)  # Sender IP (4 Bytes)
-    frame += struct.pack('!6s', [0x00] * 6)  # Target Eth (6 bytes)
-    frame += struct.pack('!4s', ip)  # Target IP (4 Bytes)
+    frame = struct.pack('!2s', bytes(0x01))  # Hardware Type (2 Bytes) Ethernet
+    frame += struct.pack('!2s', bytes(0x0800))  # Protocol Type (2 Bytes) IP
+    frame += struct.pack('!1s', bytes(6))  # Hardware Size (1 Byte) Ethernet
+    frame += struct.pack('!1s', bytes(4))  # Protocol Size (1 Byte) IP
+    frame += struct.pack('!2s', bytes(0x0001))  # Opcode (2 Bytes) Request
+    frame += struct.pack('!6s', bytes(myMAC))  # Sender Eth (6 Bytes)
+    frame += struct.pack('!4s', bytes(myIP))  # Sender IP (4 Bytes)
+    frame += struct.pack('!6s', bytes([0x00] * 6))  # Target Eth (6 bytes)
+    frame += struct.pack('!4s', bytes(ip))  # Target IP (4 Bytes)
 
     return frame
 
@@ -204,15 +204,15 @@ def createARPReply(IP, MAC):
     logging.debug('Función no implementada')
     # TODO implementar aqui
 
-    frame = struct.pack('!2s', 0x0001)
-    frame += struct.pack('!2s', 0x0800)
-    frame += struct.pack('!1s', 0x6)
-    frame += struct.pack('!1s', 0x4)
-    frame += struct.pack('!2s', 0x002)
-    frame += struct.pack('!6s', myMAC)
-    frame += struct.pack('!4s', myIP)
-    frame += struct.pack('!6s', MAC)
-    frame += struct.pack('!4s', IP)
+    frame = struct.pack('!2s', bytes(0x01))  # Hardware Type (2 Bytes) Ethernet
+    frame += struct.pack('!2s', bytes(0x0800))  # Protocol Type (2 Bytes) IP
+    frame += struct.pack('!1s', bytes(6))  # Hardware Size (1 Byte) Ethernet
+    frame += struct.pack('!1s', bytes(4))  # Protocol Size (1 Byte) IP
+    frame += struct.pack('!2s', bytes(0x0002))  # Opcode (2 Bytes) Request
+    frame += struct.pack('!6s', bytes(myMAC))  # Sender Eth (6 Bytes)
+    frame += struct.pack('!4s', bytes(myIP))  # Sender IP (4 Bytes)
+    frame += struct.pack('!6s', bytes(MAC))  # Target Eth (6 bytes)
+    frame += struct.pack('!4s', bytes(IP))  # Target IP (4 Bytes)
 
     return frame
 
@@ -303,7 +303,7 @@ def ARPResolution(ip):
     logging.debug('Función no implementada')
 
     # Comprobar si IP esta en cache TODO: mirar el lock
-    if cache[ip]:
+    if ip in cache:
         return cache[ip]
 
     # Construir peticion ARP
