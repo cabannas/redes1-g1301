@@ -95,6 +95,23 @@ def processARPRequest(data, MAC):
     """
     logging.debug('Función no implementada')
     # TODO implementar aquí
+    srcMac = data[8: 14]  # Sender Eth(6 Bytes)
+    if srcMac != MAC:
+        return
+
+    srcIp = data[14: 18]  # Sender IP (4 Bytes)
+    dstIp = data[24: 28]  # Target IP (4 Bytes)
+
+    ownIp = socket.gethostbyname(socket.gethostname())
+    if dstIp != ownIp:
+        return  # No es la propia IP
+
+    if srcIp != requestedIP:
+        return  # La IP origen no corresponde con la solicitada
+
+    resp_a_enviar = createARPReply(IP=srcIp, MAC=srcMac)
+
+    sendEthernetFrame(data=resp_a_enviar, len=len(resp_a_enviar), etherType=0x0806, dstMac=srcMac)
 
 
 def processARPReply(data, MAC):
@@ -122,31 +139,29 @@ def processARPReply(data, MAC):
     """
     global requestedIP, resolvedMAC, awaitingResponse, cache
     logging.debug('Función no implentada')
-    
 
     # TODO implementar aquí
-    srcMac = data[8: 14]    # Sender Eth(6 Bytes)
+    srcMac = data[8: 14]  # Sender Eth(6 Bytes)
     if srcMac != MAC:
         return
 
-    srcIp   = data[14: 18]  # Sender IP (4 Bytes)
-    dstMac  = data[18: 24]  # Target Eth(6 Bytes)
-    dstIp   = data[24: 28]  # Target IP (4 Bytes)
-    
-    ownIp   = socket.gethostbyname(socket.gethostname())
-    if dstIp != ownIp:      
-        return              # No es la propia IP
+    srcIp = data[14: 18]  # Sender IP (4 Bytes)
+    dstMac = data[18: 24]  # Target Eth(6 Bytes)
+    dstIp = data[24: 28]  # Target IP (4 Bytes)
+
+    ownIp = socket.gethostbyname(socket.gethostname())
+    if dstIp != ownIp:
+        return  # No es la propia IP
 
     if srcIp != requestedIP:
-        return              # La IP origen no corresponde con la solicitada
-    
-    resolvedMAC  = srcMac
+        return  # La IP origen no corresponde con la solicitada
+
+    resolvedMAC = srcMac
     cache[dstIp] = dstMac
 
     awaitingResponse = False
-    requestedIP      = None
+    requestedIP = None
     return
-
 
 
 def createARPRequest(ip):
@@ -161,6 +176,17 @@ def createARPRequest(ip):
     frame = bytes()
     logging.debug('Función no implementada')
     # TODO implementar aqui
+
+    frame[0:2] = 0x0001
+    frame[2:4] = 0x0800
+    frame[4:5] = 0x6
+    frame[5:6] = 0x4
+    frame[6:8] = 0x0001
+    frame[8:14] = myMAC
+    frame[14:18] = myIP
+    frame[18:24] = [0x00] * 6
+    frame[24:28] = ip
+
     return frame
 
 
@@ -205,11 +231,11 @@ def process_arp_frame(us, header, data, srcMac):
     if '0x0806' in upperProtos == False:
         return
 
-    arpHeader = data[0: ARP_HLEN]   # 6 Bytes
+    arpHeader = data[0: ARP_HLEN]  # 6 Bytes
     if arpHeader != ARPHeader:
         return
 
-    opcode = [ARP_HLEN: ARP_HLEN+2] # Opcode (2 Bytes)
+    opcode = data[ARP_HLEN: ARP_HLEN + 2]  # Opcode (2 Bytes)
     if opcode == 0x0001:
         processARPRequest(data, srcMac)
 
@@ -217,7 +243,6 @@ def process_arp_frame(us, header, data, srcMac):
         processARPReply(data, srcMac)
 
     return
-
 
 
 def initARP(interface):
@@ -235,7 +260,7 @@ def initARP(interface):
 
     registerCallback('process_arp_frame', '0x0806')
     myMAC = getHwAddr(interface)
-    myIP  = getIP(interface)
+    myIP = getIP(interface)
 
     if ARPResolution(myIP) is not None:
         return -1
@@ -288,7 +313,6 @@ def ARPResolution(ip):
         # Lock para requestedIP
         with IPLock:
             if requestedIP:
-
                 # Lock para cache y Lock para resolvedMAC
                 with cacheLock:
                     with MACLock:
