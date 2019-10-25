@@ -203,6 +203,17 @@ def createARPReply(IP, MAC):
     frame = bytes()
     logging.debug('Función no implementada')
     # TODO implementar aqui
+
+    frame = struct.pack('!2s', 0x0001)
+    frame += struct.pack('!2s', 0x0800)
+    frame += struct.pack('!1s', 0x6)
+    frame += struct.pack('!1s', 0x4)
+    frame += struct.pack('!2s', 0x002)
+    frame += struct.pack('!6s', myMAC)
+    frame += struct.pack('!4s', myIP)
+    frame += struct.pack('!6s', MAC)
+    frame += struct.pack('!4s', IP)
+
     return frame
 
 
