@@ -177,15 +177,15 @@ def createARPRequest(ip):
     logging.debug('Función no implementada')
     # TODO implementar aqui
 
-    frame[0:2] = 0x0001
-    frame[2:4] = 0x0800
-    frame[4:5] = 0x6
-    frame[5:6] = 0x4
-    frame[6:8] = 0x0001
-    frame[8:14] = myMAC
-    frame[14:18] = myIP
-    frame[18:24] = [0x00] * 6
-    frame[24:28] = ip
+    frame = struct.pack('!2s', 0x0001)  # Hardware Type (2 Bytes) Ethernet
+    frame += struct.pack('!2s', 0x0800)  # Protocol Type (2 Bytes) IP
+    frame += struct.pack('!1s', 0x6)  # Hardware Size (1 Byte) Ethernet
+    frame += struct.pack('!1s', 0x4)  # Protocol Size (1 Byte) IP
+    frame += struct.pack('!2s', 0x0001)  # Opcode (2 Bytes) Request
+    frame += struct.pack('!6s', myMAC)  # Sender Eth (6 Bytes)
+    frame += struct.pack('!4s', myIP)  # Sender IP (4 Bytes)
+    frame += struct.pack('!6s', [0x00] * 6)  # Target Eth (6 bytes)
+    frame += struct.pack('!4s', ip)  # Target IP (4 Bytes)
 
     return frame
 
