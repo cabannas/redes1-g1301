@@ -243,7 +243,23 @@ def sendEthernetFrame(data, len, etherType, dstMac):
     #if len(macAddress) != 6 or len(dstMac) != 6 or len(etherType) != 2:
     #    return -1
 
-    trama = struct.pack('!6s6s2s', bytes(dstMac), bytes(macAddress), bytes(etherType)) + data
+    '''
+    print('sendEthernetFrame -> dtsMac:')
+    print(dstMac)
+    print('sendEthernetFrame -> macAddress:')
+    print(macAddress)
+    print(bytes(macAddress))
+    print('sendEthernetFrame -> etherType:')
+    print(etherType)
+    print(struct.pack('!2s', bytes(etherType)))
+    print(struct.pack('!H', etherType))
+    '''
+    
+    #NOTA: dstMac y macAddress ya son objetos bytes
+    trama = struct.pack('!6s6sH', dstMac, macAddress, etherType) + data
+    print('ethernet.py -> sendEthernetFrame() -> trama:')
+    print(str(trama) + '\n')
+
     size = 14 + len
 
     if size < ETH_FRAME_MIN:

@@ -177,15 +177,28 @@ def createARPRequest(ip):
     logging.debug('Función no implementada')
     # TODO implementar aqui
 
-    frame = struct.pack('!2s', bytes(0x01))  # Hardware Type (2 Bytes) Ethernet
-    frame += struct.pack('!2s', bytes(0x0800))  # Protocol Type (2 Bytes) IP
-    frame += struct.pack('!1s', bytes(6))  # Hardware Size (1 Byte) Ethernet
-    frame += struct.pack('!1s', bytes(4))  # Protocol Size (1 Byte) IP
-    frame += struct.pack('!2s', bytes(0x0001))  # Opcode (2 Bytes) Request
-    frame += struct.pack('!6s', bytes(myMAC))  # Sender Eth (6 Bytes)
-    frame += struct.pack('!4s', bytes(myIP))  # Sender IP (4 Bytes)
-    frame += struct.pack('!6s', bytes([0x00] * 6))  # Target Eth (6 bytes)
-    frame += struct.pack('!4s', bytes(ip))  # Target IP (4 Bytes)
+    '''
+    print('createARPRequest -> myMAC:')
+    print(myMAC)
+    print(bytes(myMAC))
+    print('createARPRequest -> myIP:')
+    print(myIP)
+    print('createARPRequest -> ip:')
+    print(ip)
+    print(struct.pack('I', ip))
+    '''
+
+    # NOTA: B (1 byte), H (2 bytes), I (4 bytes), ?s (? bytes)('s':debe ser un objeto bytes)
+
+    frame = struct.pack('!H', 0x01)  # Hardware Type (2 Bytes) Ethernet
+    frame += struct.pack('H', 0x0800)  # Protocol Type (2 Bytes) IP
+    frame += struct.pack('B', 6)  # Hardware Size (1 Byte) Ethernet
+    frame += struct.pack('B', 4)  # Protocol Size (1 Byte) IP
+    frame += struct.pack('H', 0x0001)  # Opcode (2 Bytes) Request
+    frame += struct.pack('6s', myMAC)  # Sender Eth (6 Bytes), myMAC ya es un objeto bytes
+    frame += struct.pack('I', myIP)  # Sender IP (4 Bytes), myIP es un numero entero
+    frame += struct.pack('6s', bytes([0x00] * 6))  # Target Eth (6 bytes)
+    frame += struct.pack('I', ip)  # Target IP (4 Bytes), ip es un numero entero
 
     return frame
 
@@ -204,15 +217,22 @@ def createARPReply(IP, MAC):
     logging.debug('Función no implementada')
     # TODO implementar aqui
 
-    frame = struct.pack('!2s', bytes(0x01))  # Hardware Type (2 Bytes) Ethernet
-    frame += struct.pack('!2s', bytes(0x0800))  # Protocol Type (2 Bytes) IP
-    frame += struct.pack('!1s', bytes(6))  # Hardware Size (1 Byte) Ethernet
-    frame += struct.pack('!1s', bytes(4))  # Protocol Size (1 Byte) IP
-    frame += struct.pack('!2s', bytes(0x0002))  # Opcode (2 Bytes) Request
-    frame += struct.pack('!6s', bytes(myMAC))  # Sender Eth (6 Bytes)
-    frame += struct.pack('!4s', bytes(myIP))  # Sender IP (4 Bytes)
-    frame += struct.pack('!6s', bytes(MAC))  # Target Eth (6 bytes)
-    frame += struct.pack('!4s', bytes(IP))  # Target IP (4 Bytes)
+    '''
+    print('createARPRequest -> IP:')
+    print(IP)
+    print('createARPRequest -> MAC:')
+    print(MAC)
+    '''
+
+    frame = struct.pack('!H', 0x01)  # Hardware Type (2 Bytes) Ethernet
+    frame += struct.pack('H', 0x0800)  # Protocol Type (2 Bytes) IP
+    frame += struct.pack('B', 6)  # Hardware Size (1 Byte) Ethernet
+    frame += struct.pack('B', 4)  # Protocol Size (1 Byte) IP
+    frame += struct.pack('H', 0x0002)  # Opcode (2 Bytes) Request
+    frame += struct.pack('6s', myMAC)  # Sender Eth (6 Bytes), myMAC ya es un objeto bytes
+    frame += struct.pack('I', myIP)  # Sender IP (4 Bytes), myIP es un numero entero
+    frame += struct.pack('6s', bytes(MAC))  # Target Eth (6 bytes)
+    frame += struct.pack('4s', bytes(IP))  # Target IP (4 Bytes)
 
     return frame
 
@@ -314,22 +334,22 @@ def ARPResolution(ip):
 
     # Comprobar si recibe respuesta
     peticiones_enviadas = 0
+
     while peticiones_enviadas < 3:
 
         # Lock para awaitingResponse
+        
         with awaitingLock:
             awaitingResponse = True
-            time.sleep(1)
-
-        # Lock para requestedIP
-        with IPLock:
-            if requestedIP:
-                # Lock para cache y Lock para resolvedMAC
-                with cacheLock:
-                    with MACLock:
-                        cache[requestedIP] = resolvedMAC
-
-                        return resolvedMAC
+            
+        time.sleep(1)
+        print('SLEEP')
+        if requestedIP:
+            # Lock para cache y Lock para resolvedMAC
+            with cacheLock:
+                cache[requestedIP] = resolvedMAC
+            
+            return resolvedMAC
 
         peticiones_enviadas += 1
 
