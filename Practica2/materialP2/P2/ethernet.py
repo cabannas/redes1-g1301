@@ -26,6 +26,8 @@ broadcastAddr = bytes([0xFF] * 6)
 # Diccionario que alamacena para un Ethertype dado qué función de callback se debe ejecutar
 upperProtos = {}
 
+numveces = 0
+
 
 def getHwAddr(interface):
     """
@@ -65,26 +67,37 @@ def process_Ethernet_frame(us, header, data):
             -Ninguno
     """
     logging.debug('Trama nueva. Función no implementada')
-    global ownmac, upperProtos
+    global ownmac, upperProtos, numveces
+
+    print('--------------------------------------------------------')
+    print('process_Ethernet_frame')
+
+
     ownmac = (hex(uuid.getnode()))
-    print("DIRECCION MAC PROPIA: " + str(ownmac))
-    macDst = data[0:6]
-    print("DIRECCION MAC DESTINO: " + str(macDst))
-    macOrg = data[6:12]
-    print("DIRECCION MAC ORIGEN: " + str(macOrg))
-    EthType = data[12:14]
-    print("VALOR ETHERTYPE: " + str(EthType))
+    macDst = bytes(data[0:6])
+    macOrg = bytes(data[6:12])
+    EthType = bytes(data[12:14])
+    
+    print("ownmac: " + str(ownmac))
+    print("macDst: " + str(macDst))
+    print("macOrg: " + str(macOrg))
+    print("EthType: " + str(EthType))
 
-    print("DATA:")
-    print(data)
+    print("Numero de veces ejecutado:")
+    numveces += 1
+    print(numveces)
+    
+    if ownmac != macDst and broadcastAddr != macDst:
+        return
 
-    if ownmac == macDst or broadcastAddr == macDst:
-        print(upperProtos)
-        callbackFun = upperProtos.get(str(EthType))
+    #callbackFun = upperProtos.get(str(EthType))
+    callbackFun = upperProtos.get('0x' + str(EthType.hex()))
+    if callbackFun is None:
+        logging.debug('Error callbackFun')
+        print('Error callbackFun')
+        return
 
-        if callbackFun is None:
-            return
-        callbackFun(us, header, data[14:], macOrg)
+    callbackFun(us, header, data[14:], macOrg)
 
     # TODO: Implementar aquí el código que procesa una trama Ethernet en recepción
 
@@ -173,6 +186,7 @@ def startEthernetLevel(interface):
     handle = None
     levelInitialized = False
     logging.debug('Función no implementada')
+    
     # TODO: implementar aquí la inicialización de la interfaz y de las variables globales
     if levelInitialized:
         return -1
@@ -234,7 +248,10 @@ def sendEthernetFrame(data, len, etherType, dstMac):
         Retorno: 0 si todo es correcto, -1 en otro caso
     '''
     global macAddress, handle
+    
     logging.debug('Función no implementada')
+    print('--------------------------------------------------------')
+    print("sendEthernetFrame")
 
     # trama = cabecera + payload
     # cabecera  = macAddress + dstMac + etherType
@@ -243,22 +260,11 @@ def sendEthernetFrame(data, len, etherType, dstMac):
     #if len(macAddress) != 6 or len(dstMac) != 6 or len(etherType) != 2:
     #    return -1
 
-    '''
-    print('sendEthernetFrame -> dtsMac:')
-    print(dstMac)
-    print('sendEthernetFrame -> macAddress:')
-    print(macAddress)
-    print(bytes(macAddress))
-    print('sendEthernetFrame -> etherType:')
-    print(etherType)
-    print(struct.pack('!2s', bytes(etherType)))
-    print(struct.pack('!H', etherType))
-    '''
     
     #NOTA: dstMac y macAddress ya son objetos bytes
     trama = struct.pack('!6s6sH', dstMac, macAddress, etherType) + data
-    print('ethernet.py -> sendEthernetFrame() -> trama:')
-    print(str(trama) + '\n')
+    #print('ethernet.py -> sendEthernetFrame() -> trama:')
+    #print(str(trama) + '\n')
 
     size = 14 + len
 

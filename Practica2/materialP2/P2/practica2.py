@@ -65,6 +65,8 @@ if __name__ == "__main__":
 					#Convertimos la dirección IP en formato textual (X.X.X.X) a un entero de 32 bits.
 					ip=struct.unpack('!I',socket.inet_aton(msg))[0]
 					#Llamamos a la función de realizar resolución ARP con la IP que hemos leído
+					print("Este es el valor de IP")
+					print(ip)
 					ret = ARPResolution(ip)
 					#Si hay respuesta imprimir la dirección MAC
 					if ret is not None:
