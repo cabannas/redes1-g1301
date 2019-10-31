@@ -285,13 +285,13 @@ def process_arp_frame(us, header, data, srcMac):
 
     # NOTA: unpack se hace con bytes
 
-    opcode = struct.unpack('!H', bytes(data[ARP_HLEN: ARP_HLEN + 2]))   # Opcode (2 Bytes)
-    print('OPCODE: ' + str(hex(opcode[0])))
+    opcode = hex(struct.unpack('!H', bytes(data[ARP_HLEN: ARP_HLEN + 2]))[0])   # Opcode (2 Bytes)
+    print('OPCODE: ' + str(opcode))
 
-    if hex(opcode[0]) is 0x0001:
+    if opcode is 0x0001:
         processARPRequest(data, srcMac)
 
-    elif hex(opcode[0]) is 0x0002:
+    elif opcode is 0x0002:
         processARPReply(data, srcMac)
 
     return

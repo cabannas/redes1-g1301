@@ -79,9 +79,12 @@ def process_Ethernet_frame(us, header, data):
     EthType = bytes(data[12:14])
     
     print("ownmac: " + str(ownmac))
-    print("macDst: " + str(macDst))
+
+    print('macDst: ' + str(macDst))
+    print("broadcastAddr: " + str(broadcastAddr))
     print("macOrg: " + str(macOrg))
     print("EthType: " + str(EthType))
+
 
     print("Numero de veces ejecutado:")
     numveces += 1
@@ -97,6 +100,7 @@ def process_Ethernet_frame(us, header, data):
         print('Error callbackFun')
         return
 
+    print(callbackFun)
     callbackFun(us, header, data[14:], macOrg)
 
     # TODO: Implementar aquí el código que procesa una trama Ethernet en recepción
