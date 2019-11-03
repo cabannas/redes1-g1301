@@ -55,7 +55,7 @@ if __name__ == "__main__":
 	'''
 	while True:
 		try:
-			msg = input('Introduce la dirección IP a resolver (q para salir y p para mostrar la caché):\n')
+			msg = input('\nIntroduce la dirección IP a resolver (q para salir y p para mostrar la caché):\n')
 			if msg == 'q':
 				break
 			elif msg == 'p':
@@ -65,11 +65,11 @@ if __name__ == "__main__":
 					#Convertimos la dirección IP en formato textual (X.X.X.X) a un entero de 32 bits.
 					ip=struct.unpack('!I',socket.inet_aton(msg))[0]
 					#Llamamos a la función de realizar resolución ARP con la IP que hemos leído
-					print("Este es el valor de IP")
-					print(ip)
 					ret = ARPResolution(ip)
 					#Si hay respuesta imprimir la dirección MAC
 					if ret is not None:
+						print('\npractica2.py -> ret')
+						print('MAC asociada a la IP %s: ' %(msg))
 						print(':'.join(['{:02X}'.format(b) for b in ret]))
 					else:
 						print('Dirección no encontrada\n')
