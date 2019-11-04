@@ -113,7 +113,9 @@ def processARPRequest(data,MAC):
     print('myIP:        ' + str(struct.pack('!I', myIP)))
     '''
     if dstIp != struct.pack('!I', myIP):
+        '''
         logging.error('dstIp != myIP')
+        '''
         return
 
     '''
@@ -174,7 +176,9 @@ def processARPReply(data,MAC):
     print('myIP:        ' + str(struct.pack('!I', myIP)))
     '''
     if dstIp != struct.pack('!I', myIP):
+        '''
         logging.error('dstIp != myIP')
+        '''
         return
 
     with globalLock:
@@ -183,6 +187,9 @@ def processARPReply(data,MAC):
         print('requestedIP: ' + str(requestedIP))
         '''
         if srcIp != requestedIP:
+            '''
+            logging.error('srcIp != requestedIP')
+            '''
             return
 
     with globalLock:
@@ -350,9 +357,9 @@ def initARP(interface):
     '''
 
     #Realiza una peticion ARP gratuita, para comprobar si la IP propia ya esta asignada o no
-    print('\nARP gratuita\n')
+    print('\nARP gratuita')
     if ARPResolution(myIP) is not None:
-        logging.error('ARP gratuita falla, la IP propia ya esta asignada')
+        logging.error('Falla la peticion ARP gratuita, ya esta asignada la propia IP')
         return False
 
     arpInitialized = True
@@ -389,7 +396,7 @@ def ARPResolution(ip):
     # Comprobar si la IP esta en la cache
     with cacheLock:
         if ip in cache:
-            print('Cogiendo la direccion MAC desde el cache')
+            print('\nCogiendo la direccion MAC desde el cache')
             return cache[ip]
 
     # Construir peticion ARP
@@ -407,9 +414,10 @@ def ARPResolution(ip):
     while peticiones_enviadas < 3:
 
         # Enviar peticion
-        print(str(peticiones_enviadas + 1) + ' intento')
+        print('\nIntento: ' + str(peticiones_enviadas + 1))
         sendEthernetFrame(data=trama_arp, len=len(trama_arp), etherType=0x0806, dstMac=broadcastAddr)
-        print('Esperando respuesta ...\n')
+        print('-> Peticion enviada')
+        print('Esperando respuesta ...')
         time.sleep(1)
 
         with globalLock:
