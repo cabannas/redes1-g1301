@@ -1,0 +1,47 @@
+
+Autores:
+
+* Daniel Alexander Cabañas Gonzalez
+* Xingxin Chen Zhan
+
+
+Comentarios a transmitir al profesor:
+
+* En la función initARP, aunque el enunciado determina que se devuelva 0 ó -1, hemos prodecido a devolver True o False, debido a la estructura del programa practica2.py no se ejecuta correctamente si se devuelven los valores numéricos pedidos. Sin embargo, tiene un correcto funcionamiento al devolver los tipo booleano.
+
+
+Sección:
+
+*Normativa de entrega cumplida en su totalidad:
+REALIZADO. Hemos entregado correctamente y dentro de los límites de entrega todos los archivos pedidos, cumpliendo así la normativa de entrega.
+
+*Fichero leeme.txt bien explicado:
+REALIZADO. Hemos incluido el fichero leeme.txt con una correcta y clara explicación.
+
+*Recibir tramas Ethernet, realizar comprobaciones y llamar correctamente a la función de callback de nivel superior:
+REALIZADO. En la función initARP registramos las función callback process_arp_frame con código 0x0806. En la función process_Ethernet_frame llamamos a esta función callback. Si la función callback no está correctamente implementada el programa no sería capaz de procesar peticiones tipo request o tipo reply.
+
+*Enviar tramas Ethernet correctamente:
+REALIZADO. Utilizamos la función sendEthernetFrame (que llama a la función pcap_inject de la libreria rc1_pcap) para enviar las tramas Ethernet (tres intentos con un segundo entre cada intento según el enunciado) y podemos observar que realizamos los envíos correctamente porque si no, no recibiríamos los paquetes con los que trabajamos posteriormente.
+
+*Enviar correctamente peticiones ARP:
+REALIZADO. Utilizamos la funciones createARPRequest, ARPResolution y sendEthernetFrame para el correcto envío de peticiones ARP. Generamos la petición creando una cabecera en bloque con toda la información del remitente y la dirección IP del destinatario.
+
+*Procesar correctamente peticiones ARP recibidas:
+REALIZADO. Para ello utilizamos las funciones process_arp_frame y processARPRequest. Comparamos las cabeceras el opcode para saber que tipo de función estamos procesando (request o reply).
+
+*Enviar correctamente respuestas ARP:
+REALIZADO. Utilizamos las funciones createARPReply, processARPRequest, sendEthernetFrame. Tras procesar una petición ARP, generamos una respuesta y la enviamos al remitente.
+
+*Procesar correctamente respuestas ARP:
+REALIZADO. Utilizamos las funciones process_arp_frame y processARPReply. Procesamos la respuesta que recibimos tras enviar una petición ARP.
+
+*Manejo correcto de la caché ARP:
+REALIAZDO. Una vez hemos realizado una resolución de ARP con la función ARPResolution, primero comprobamos si la MAC se encuentra en la caché ARP. Si es así, utilizamos esa MAC directamente. Si no, en la función processARPReplay guardamos la MAC resuelta. La caché ARP dura 10 segundos. Después de esos 10 segundos, la caché se vaciará y tendremos que volver a guardar las MAC.
+
+*Uso correcto de Locks:
+REALIZADO. Utilizamos un lock (llamado global_Lock) para proteger las variables globales (requestedIP resolvedMAC y awaitingResponse)
+
+*Realiza correctamente el ARP gratuito:
+REALIZADO. En la función initARP realizamos una petición ARP gratuita para comprobar si la propia IP ya está asignada a otra máquina. No pueden haber dos interfaces con la misma dirección IP. En caso de que esto ocurriera, se detiene la ejecución y se devuelve un error.
+
