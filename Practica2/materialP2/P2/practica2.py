@@ -68,7 +68,6 @@ if __name__ == "__main__":
 					ret = ARPResolution(ip)
 					#Si hay respuesta imprimir la dirección MAC
 					if ret is not None:
-						print('\npractica2.py -> ret')
 						print('MAC asociada a la IP %s: ' %(msg))
 						print(':'.join(['{:02X}'.format(b) for b in ret]))
 					else:

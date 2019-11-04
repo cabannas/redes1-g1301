@@ -66,20 +66,24 @@ def process_Ethernet_frame(us,header,data):
     logging.debug('Trama nueva. Función implementada: process_Ethernet_frame')
     global macAddress
 
-    print('-------------------------------------------------------------------')
+    '''
+    print('------------------------------------------------------------------')
     print('process_Ethernet_frame')
+    '''
 
     #Implementacion del código que procesa una trama Ethernet en recepción
-    dstMAC    = bytes(data[0:6])
-    srcMAC    = bytes(data[6:12])
+    dstMac    = bytes(data[0:6])
+    srcMac    = bytes(data[6:12])
     ethertype = bytes(data[12:14])
 
-    print('dstMAC:    ' + str(dstMAC))
-    print('srcMAC:    ' + str(srcMAC))
+    '''
+    print('dstMac:    ' + str(dstMac))
+    print('srcMac:    ' + str(srcMac))
     print('ethertype: ' + str(ethertype))
     print('myMAC:     ' + str(macAddress))
+    '''
     
-    if dstMAC != macAddress and dstMAC != broadcastAddr:
+    if dstMac != macAddress and dstMac != broadcastAddr:
         return
 
     callbackFun = upperProtos.get('0x' + str(ethertype.hex()))
@@ -88,7 +92,7 @@ def process_Ethernet_frame(us,header,data):
         return
     
     #Llamamos a la funcion de nivel superiorr
-    callbackFun(us, header, data[14:], srcMAC)
+    callbackFun(us, header, data[14:], srcMac)
     
 
 def process_frame(us,header,data):
@@ -240,9 +244,11 @@ def sendEthernetFrame(data,len,etherType,dstMac):
     global macAddress,handle
     logging.debug('Función implementada: sendEthernetFrame')
     
-    print('-------------------------------------------------------------------')
+    '''
+    print('------------------------------------------------------------------')
     print('sendEthernetFrame')
-
+    '''
+    
     # Estructura de la trama Ethernet:
     # trama     = cabecera + payload
     # cabecera  = dstMac + macAddress + etherType
@@ -250,7 +256,9 @@ def sendEthernetFrame(data,len,etherType,dstMac):
 
     #dstMac y macAddress ya son objetos bytes
     trama = struct.pack('!6s6sH', dstMac, macAddress, etherType) + data
-    print('cabecera:  ' + str(struct.pack('!6s6sH', dstMac, macAddress, etherType)))
+    '''
+    print('cabecera: ' + str(struct.pack('!6s6sH', dstMac, macAddress, etherType)))
+    '''
 
     size = 14 + len
     if size < ETH_FRAME_MIN:

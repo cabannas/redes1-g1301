@@ -90,13 +90,17 @@ def processARPRequest(data,MAC):
     logging.debug('Función implementada: processARPRequest')
     global myIP
 
-    print('-------------------------------------------------------------------')
+    '''
+    print('------------------------------------------------------------------')
     print('processARPRequest')
-      
+    '''
+
     srcMac = bytes(data[8: 14])     # Sender Eth(6 Bytes)
 
+    '''
     print('srcMac:      ' + str(srcMac))
     print('MAC:         ' + str(MAC))
+    '''
     if srcMac != MAC:
         logging.error('src != MAC')
         return
@@ -104,13 +108,17 @@ def processARPRequest(data,MAC):
     srcIp = bytes(data[14: 18])     # Sender IP (4 Bytes)
     dstIp = bytes(data[24: 28])     # Target IP (4 Bytes)
 
+    '''
     print('dstIp:       ' + str(dstIp))
     print('myIP:        ' + str(struct.pack('!I', myIP)))
+    '''
     if dstIp != struct.pack('!I', myIP):
         logging.error('dstIp != myIP')
         return
 
+    '''
     print('srcIp:       ' + str(srcIp))
+    '''
     resp_a_enviar = createARPReply(IP=struct.unpack('!I', srcIp)[0], MAC=srcMac)
     
     sendEthernetFrame(data=resp_a_enviar, len=len(resp_a_enviar), etherType=0x0806, dstMac=srcMac)
@@ -142,13 +150,17 @@ def processARPReply(data,MAC):
     global requestedIP,resolvedMAC,awaitingResponse,cache
     logging.debug('Función implementada: processARPReply')    
     
-    print('-------------------------------------------------------------------')
+    '''
+    print('------------------------------------------------------------------')
     print('processARPReply')
+    '''
 
     srcMac = bytes(data[8: 14])     # Sender Eth(6 Bytes)
     
+    '''
     print('srcMac:      ' + str(srcMac))
     print('MAC:         ' + str(MAC))
+    '''
     if srcMac != MAC:
         logging.error('srcMac != MAC')
         return
@@ -157,17 +169,20 @@ def processARPReply(data,MAC):
     dstMac = bytes(data[18: 24])    # Target Eth(6 Bytes)
     dstIp  = bytes(data[24: 28])    # Target IP (4 Bytes)
 
+    '''
     print('dstIp:       ' + str(dstIp))
     print('myIP:        ' + str(struct.pack('!I', myIP)))
+    '''
     if dstIp != struct.pack('!I', myIP):
         logging.error('dstIp != myIP')
         return
 
     with globalLock:
+        '''
         print('srcIp:       ' + str(srcIp))
         print('requestedIP: ' + str(requestedIP))
+        '''
         if srcIp != requestedIP:
-            logging.error('srcIp != requestedIP')
             return
 
     with globalLock:
@@ -179,12 +194,7 @@ def processARPReply(data,MAC):
                     
         awaitingResponse = False
         requestedIP      = None
-        '''
-        print('\nprocessARPReply -> VARIABLES GLOBALES')
-        print('awaitingResponse: '  + str(awaitingResponse))
-        print('requestedIP:      '  + str(requestedIP))
-        print('resolvedMAC:      '  + str(resolvedMAC) + '\n')
-        '''
+
     return
 
 
@@ -200,8 +210,10 @@ def createARPRequest(ip):
     frame = bytes()
     logging.debug('Función implementada: createARPRequest')
 
-    print('-------------------------------------------------------------------')
+    '''
+    print('------------------------------------------------------------------')
     print('createARPRequest')
+    '''
 
     frame += struct.pack('!H', 0x0001)              # Hardware Type (2 Bytes) Ethernet
     frame += struct.pack('!H', 0x0800)              # Protocol Type (2 Bytes) IP
@@ -213,12 +225,14 @@ def createARPRequest(ip):
     frame += struct.pack('6s', bytes([0x00] * 6))   # Target Eth (6 bytes)
     frame += struct.pack('!I', ip)                  # Target IP (4 Bytes), ip es un numero entero
 
+    '''
     print('\n**************************************')
     print('srcMac: ' + str(struct.pack('6s', myMAC)))
     print('srcIP:  ' + str(struct.pack('!I', myIP)))
     print('dstMac: ' + str(struct.pack('6s', bytes([0x00] * 6))))
     print('dstIP:  ' + str(struct.pack('!I', ip)))
     print('**************************************\n')
+    '''
     return frame
 
     
@@ -235,10 +249,11 @@ def createARPReply(IP,MAC):
     frame = bytes()
     logging.debug('Función no implementada')
 
-    #TODO implementar aqui
-    print('-------------------------------------------------------------------')
+    '''
+    print('------------------------------------------------------------------')
     print('createARPReply')
-
+    '''
+    
     frame += struct.pack('!H', 0x0001)      # Hardware Type (2 Bytes) Ethernet
     frame += struct.pack('!H', 0x0800)      # Protocol Type (2 Bytes) IP
     frame += struct.pack('B' , 6)           # Hardware Size (1 Byte) Ethernet
@@ -249,12 +264,14 @@ def createARPReply(IP,MAC):
     frame += struct.pack('6s', bytes(MAC))  # Target Eth (6 bytes)
     frame += struct.pack('!I', IP)          # Target IP (4 Bytes)
 
+    '''
     print('\n**************************************')
     print('srcMac: ' + str(struct.pack('6s', myMAC)))
     print('srcIP:  ' + str(struct.pack('!I', myIP) ))
     print('dstMac: ' + str(struct.pack('6s', bytes(MAC))))
     print('dstIP:  ' + str(struct.pack('!I', IP)))
     print('**************************************\n')
+    '''
     return frame
 
 
@@ -279,11 +296,13 @@ def process_arp_frame(us,header,data,srcMac):
     '''
     logging.debug('Función implementada: process_arp_frame')
 
-    print('-------------------------------------------------------------------')
+    '''
+    print('------------------------------------------------------------------')
     print('process_arp_frame')
+    '''
 
     if '0x0806' not in upperProtos:
-        print('0x0806 no esta registrado')
+        logging.error('0x0806 no esta registrado')
         return
 
     #data es un bytearray, para coger sus campos necesitamos usar la funcion bytes()
@@ -316,23 +335,28 @@ def initARP(interface):
     global myIP,myMAC,arpInitialized
     logging.debug('Función implementada: initARP')
 
-    print('-------------------------------------------------------------------')
+    '''
+    print('------------------------------------------------------------------')
     print('initARP')
+    '''
 
     registerCallback(process_arp_frame, '0x0806')
     myMAC = getHwAddr(interface)
     myIP  = getIP(interface)
 
+    '''
     print('myMAC: ' + str(myMAC))
     print('myIP:  ' + str(struct.pack('!I', myIP)))
-    
+    '''
+
     #Realiza una peticion ARP gratuita, para comprobar si la IP propia ya esta asignada o no
-    print('\nARP gratuita:')
+    print('\nARP gratuita\n')
     if ARPResolution(myIP) is not None:
-        return -1
+        logging.error('ARP gratuita falla, la IP propia ya esta asignada')
+        return False
 
     arpInitialized = True
-    return 0
+    return True
 
 
 def ARPResolution(ip):
@@ -357,8 +381,10 @@ def ARPResolution(ip):
     global requestedIP,awaitingResponse,resolvedMAC
     logging.debug('Función implementada: ARPResolution')
     
-    print('-------------------------------------------------------------------')
+    '''
+    print('------------------------------------------------------------------')
     print('ARPResolution')
+    '''
 
     # Comprobar si la IP esta en la cache
     with cacheLock:
@@ -372,25 +398,31 @@ def ARPResolution(ip):
     with globalLock:
         requestedIP      = struct.pack('!I', ip)
         awaitingResponse = True
+        '''
         print('requestedIP:      ' + str(requestedIP))
         print('awaitingResponse: ' + str(awaitingResponse) + '\n')
+        '''
 
     peticiones_enviadas = 0
     while peticiones_enviadas < 3:
 
         # Enviar peticion
+        print(str(peticiones_enviadas + 1) + ' intento')
         sendEthernetFrame(data=trama_arp, len=len(trama_arp), etherType=0x0806, dstMac=broadcastAddr)
+        print('Esperando respuesta ...\n')
         time.sleep(1)
 
         with globalLock:
             #Si ha recibidio respuesta, devolver la direccion MAC resuelta
             if awaitingResponse == False:
+                '''
                 print('\n**************************************')
                 print('ARPResolution -> VARIABLES GLOBALES')
                 print('awaitingResponse: ' + str(awaitingResponse))
                 print('requestedIP:      ' + str(requestedIP))
                 print('resolvedMAC:      ' + str(resolvedMAC))
                 print('**************************************\n')
+                '''
                 return resolvedMAC
 
         peticiones_enviadas += 1
