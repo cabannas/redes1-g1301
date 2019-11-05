@@ -55,7 +55,7 @@ if __name__ == "__main__":
 	'''
 	while True:
 		try:
-			msg = input('\nIntroduce la dirección IP a resolver (q para salir y p para mostrar la caché):\n')
+			msg = input('\nIntroduce la dirección IP a resolver (q para salir y p para mostrar la caché): ')
 			if msg == 'q':
 				break
 			elif msg == 'p':
@@ -71,10 +71,10 @@ if __name__ == "__main__":
 						print('\nMAC asociada a la IP %s: ' %(msg))
 						print(':'.join(['{:02X}'.format(b) for b in ret]))
 					else:
-						print('Dirección no encontrada\n')
+						print('\nDirección no encontrada')
 				except OSError:
 					#Si ha fallado la conversión de IP, el formato es incorrecto.
-					print('Formato de IP incorrecta\n')
+					print('\nFormato de IP incorrecta')
 		except KeyboardInterrupt:
 			print('\n')
 			break

@@ -217,6 +217,10 @@ def stopEthernetLevel():
     '''
     logging.debug('Función implementada: stopEthernetLevel')
 
+    if handle is None or recvThread is None:
+        logging.error('Error al liberar recursos')
+        return -1
+
     #Liberamos todos los recursos
     recvThread.stop()
     pcap_close(handle)
@@ -260,6 +264,7 @@ def sendEthernetFrame(data,len,etherType,dstMac):
     print('cabecera: ' + str(struct.pack('!6s6sH', dstMac, macAddress, etherType)))
     '''
 
+    #dstMac (6 Bytes) + macAddress (6 Bytes) + etherType (2 Bytes) = 14
     size = 14 + len
     if size < ETH_FRAME_MIN:
         pad_len = ETH_FRAME_MIN - size

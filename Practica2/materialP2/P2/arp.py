@@ -396,15 +396,15 @@ def ARPResolution(ip):
     # Comprobar si la IP esta en la cache
     with cacheLock:
         if ip in cache:
-            print('\nCogiendo la direccion MAC desde el cache')
+            print('\nDevolviendo la direccion MAC de la cache ...')
             return cache[ip]
 
     # Construir peticion ARP
     trama_arp = createARPRequest(ip)
 
     with globalLock:
-        requestedIP      = struct.pack('!I', ip)
         awaitingResponse = True
+        requestedIP      = struct.pack('!I', ip)
         '''
         print('requestedIP:      ' + str(requestedIP))
         print('awaitingResponse: ' + str(awaitingResponse) + '\n')
@@ -422,7 +422,7 @@ def ARPResolution(ip):
 
         with globalLock:
             #Si ha recibidio respuesta, devolver la direccion MAC resuelta
-            if awaitingResponse == False:
+            if awaitingResponse is False:
                 '''
                 print('\n**************************************')
                 print('ARPResolution -> VARIABLES GLOBALES')
