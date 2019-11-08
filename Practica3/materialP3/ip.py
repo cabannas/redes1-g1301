@@ -2,6 +2,9 @@ from ethernet import *
 from arp import *
 from fcntl import ioctl
 import subprocess
+
+import math
+
 SIOCGIFMTU = 0x8921
 SIOCGIFNETMASK = 0x891b
 #Diccionario de protocolos. Las claves con los valores numéricos de protocolos de nivel superior a IP
@@ -145,6 +148,8 @@ def registerIPProtocol(callback,protocol):
             -protocol: valor del campo protocolo de IP para el cuál se quiere registrar una función de callback.
         Retorno: Ninguno 
     '''
+    protocols[protocol] = callback
+
 
 def initIP(interface,opts=None):
     global myIP, MTU, netmask, defaultGW,ipOpts
@@ -167,6 +172,7 @@ def initIP(interface,opts=None):
 
 def sendIPDatagram(dstIP,data,protocol):
     global IPID
+    global myIP, MTU, netmask, defaultGW, ipOpts
     '''
         Nombre: sendIPDatagram
         Descripción: Esta función construye un datagrama IP y lo envía. En caso de que los datos a enviar sean muy grandes la función
@@ -195,6 +201,53 @@ def sendIPDatagram(dstIP,data,protocol):
           
     '''
     header = bytes()
+    
+    #Valores iniciales
+    IHL = 20
+    numFragm = 1
+    
+
+    if ipOpts is not None:
+        IHL += len(ipOpts)  #Suma el tam del campo de "Opciones"
 
 
+    totalLength = IHL + len(data)
+    if totalLength > MTU:
+        numFragm = math.ceil(totalLength/MTU)   #Para redondear hacia arriba. Ejemplo: 2 = math.ceil(1.1)
 
+
+    for i in range(0, numFragm):
+        print(i * MTU)
+
+        #header += struct.pack('', 4)   #Version (4 bits) (valor=4)
+        #header += struct.pack('', IHL/4)    #IHL (4 bits) (min=20 bytes, max=60 bytes) (*4)
+        #header += struct.pack('B', DEFAULT_TOS)    #Type of Service (1 byte) (valor=0)
+        #header += struct.pack('!H', )   #Total Length (2 bytes) (cabecera + payload)
+        #header += struct.pack('!H', IPID)  #Identification (2 bytes) (IPID)
+
+        MF = 1
+        if i == (numFragm - 1):
+            MF = 0
+        #header += struct.pack('', 0, 0, MF)    #Flags(3 bits)
+        #header += struct.pack('', )    #Offset (13 bits) (*8)
+        #header += struct.pack('B', DEFAULT_TTL)    #Time to Live (1 byte) (valor=64)
+        #header += struct.pack('B', protocol)   #Protocol (1 byte) (ICMP=1, TCP=16, UDP=17)
+        #header += struct.pack('!H', chksum())  #Header Checksum (2 bytes)
+        #header += struct.pack('!I', myIP)  #Direccion IP origen (4 bytes)
+        #header += struct.pack('!I', )  #Direccion IP destino (4 bytes)
+
+        if ipOpts is not None:
+            for i in range(0, len(ipOpts)):
+                header += struct.pack('!I', ipOpts[i: i+4])    #Opciones (tam variable) (min=0 bytes, max=40 bytes) (multiplo 4 bytes)
+        
+        datagrama = header + data
+
+    #tam max datagrama = MTU
+    
+    #if dstIP == :
+    #    dstMac = ARPResolution(dstIP)
+    
+
+    #sendEthernetFrame(data=datagrama, len=totalLength, etherType=0x0806, dstMac=)
+    IPID += 1
+    return True
