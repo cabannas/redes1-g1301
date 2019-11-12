@@ -123,6 +123,25 @@ def process_IP_datagram(us,header,data,srcMac):
         Retorno: Ninguno
     '''
 
+    #TODO: HAY QUE IMPLEMENTAR ESTA FUNCION
+
+    # Estraer los campos de la cabecera IP
+
+    # Calcular el checksum
+    if not chksum(msg) == 0:
+        print("Error de checksum")
+        return
+
+    # Analizar bits de MF y offset
+    if not offset == 0:
+        print("Error de offset")
+        return
+
+    # Loggear campos
+
+    # Comprobar funcion callback
+
+
 
 
 
