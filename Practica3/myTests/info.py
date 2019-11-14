@@ -6,8 +6,7 @@ import time
 import logging
 import socket
 
-from ethernet import *
-from arp import *
+import fcntl
 from fcntl import ioctl
 import subprocess
 SIOCGIFMTU = 0x8921
