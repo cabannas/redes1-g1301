@@ -12,6 +12,9 @@ import subprocess
 SIOCGIFMTU = 0x8921
 SIOCGIFNETMASK = 0x891b
 
+import ipaddress
+
+
 def getIP(interface):
     '''
         Nombre: getIP
@@ -20,7 +23,7 @@ def getIP(interface):
             -interface: nombre de la interfaz
         Retorno: Entero de 32 bits con la dirección IP de la interfaz
     '''
-    global ip;s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     ip = fcntl.ioctl(
         s.fileno(),
         0x8915,  # SIOCGIFADDR
@@ -106,10 +109,14 @@ if __name__ == "__main__":
 	
 	print()
 	
-	print('myIP: ' + str(getIP(args.interface)) + '\t------> ' + str(ip[0]) + '.' + str(ip[1]) + '.' + str(ip[2]) + '.' + str(ip[3]))
-	
-	print('MTU: ' + str(getMTU(args.interface)))
+	myIP = getIP(args.interface)
+	print('myIP: ' + str(myIP) + '\t------> ' + str(ipaddress.IPv4Address(myIP)))
+
+	mtu = getMTU(args.interface)
+	print('MTU: ' + str(mtu))
 	
 	print('Netmask: ' + str(getNetmask(args.interface)) + '\t------> ' + str(netmask[0]) + '.' + str(netmask[1]) + '.' + str(netmask[2]) + '.' + str(netmask[3]))
-	
+	netmask = getNetmask(args.interface)
+    print('Netmask: ' + str(myIP) + '\t------> ' + str(ipaddress.IPv4Address(myIP)))
+
 	print('DefaultGW: ' + str(getDefaultGW(args.interface)) + '\t------> ' + str(dfw))

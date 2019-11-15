@@ -314,14 +314,20 @@ def sendIPDatagram(dstIP,data,protocol):
 
 
             #Creamos la cabecera definitiva, con el nuevo checksum calculado
-            h = header[0: 10] + struct.pack('!H', checksum) + header[12: 20+len(ipOpts)]
+            h = header[0: 10] + struct.pack('!H', checksum) + header[12: 20]
+
+            if ipOpts is not None:
+                h += header[20: 20 + len(ipOpts)]
+
 
             #Creamos el fragmento
-            fragment = h + data[(cantidadMax * i): payload]
+            offset = offset * 8
+            fragment = h + data[offset: offset + payload]
 
 
             #Si la direccion IP destino esta en mi subred, enviamos una peticion ARP para obtener la MAC aasociada a esa IP
             if dstIp is :
+                netmask
                 dstMac = ARPResolution(dstIP)
 
             #Si no esta:

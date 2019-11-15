@@ -48,4 +48,6 @@ ip_header_fields = struct.unpack(fmt_string, ip_header)
 print('\nCampos de la cabecera:')
 print(ip_header_fields)
 
+print('\ntotal_length: ' + str(ip_header_fields[2]))
+
 print('\nLongitud: ' + str(len(ip_header)))
