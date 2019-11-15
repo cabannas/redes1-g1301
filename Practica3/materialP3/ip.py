@@ -7,9 +7,11 @@ from fcntl import ioctl
 import subprocess
 
 import math
+import ipaddress
 
 SIOCGIFMTU = 0x8921
 SIOCGIFNETMASK = 0x891b
+
 #Diccionario de protocolos. Las claves con los valores numéricos de protocolos de nivel superior a IP
 #por ejemplo (1, 6 o 17) y los valores son los nombres de las funciones de callback a ejecutar.
 protocols={}
@@ -23,6 +25,7 @@ IP_MIN_HLEN = 20
 IP_MAX_HLEN = 60
 #Valor de TTL por defecto
 DEFAULT_TTL = 64
+
 
 def chksum(msg):
     """
@@ -47,6 +50,7 @@ def chksum(msg):
 
     return s
 
+
 def getMTU(interface):
     """
         Nombre: getMTU
@@ -62,7 +66,8 @@ def getMTU(interface):
     s.close()
    
     return mtu
-   
+
+
 def getNetmask(interface):
     """
         Nombre: getNetmask
@@ -93,7 +98,6 @@ def getDefaultGW(interface):
     dfw = p.stdout.read().decode('utf-8')
     print(dfw)
     return struct.unpack('!I',socket.inet_aton(dfw))[0]
-
 
 
 def process_IP_datagram(us,header,data,srcMac):
@@ -222,9 +226,10 @@ def initIP(interface,opts=None):
         Retorno: True o False en función de si se ha inicializado el nivel o no
     '''
 
+
 def sendIPDatagram(dstIP,data,protocol):
     global IPID
-    global myIP, MTU, netmask, defaultGW, ipOpts 
+    global myIP, MTU, defaultGW, ipOpts 
     '''
         Nombre: sendIPDatagram
         Descripción: Esta función construye un datagrama IP y lo envía. En caso de que los datos a enviar sean muy grandes la función
@@ -255,9 +260,12 @@ def sendIPDatagram(dstIP,data,protocol):
     header = bytes()
 
     #Valores iniciales
-    IHL = 20    #longitud basica
+    IHL = 20    #Longitud basica de la cabecera
     fragmentar = False
-    numFragm = 0
+    payload = 0
+    cantidadMax = 0
+    numFragm = 1
+    totalDatos = len(data)
 
 
     #Si existen opciones, sumamos la longitud del campo "opcion" a la cabecera IP
@@ -266,14 +274,14 @@ def sendIPDatagram(dstIP,data,protocol):
 
 
     #Longitud total del datagrama IP (cabecera + payload)
-    totalDatos = IHL + len(data)
+    datagramLength = IHL + totalDatos
 
 
-    if totalDatos > MTU:
+    if datagramLength > MTU:
         fragmentar = True
 
         #Cantidad de datos que podemos guardar en cada fragmento
-        cantidadMax = MTU - IHL    
+        cantidadMax = MTU - IHL
 
         #Si la cantidad maxima no es multiplo de 8, cogemos un valor mas cercano a esa cantidad por abajo
         if cantidadMax % 8 != 0:
@@ -285,96 +293,102 @@ def sendIPDatagram(dstIP,data,protocol):
 
 
 
-    
-    if fragmentar is True:
-        for i in range(0, numFragm):
-            
-            #Version (4 bits) (valor=4)
-            #IHL (4 bits) (min=20 bytes, max=60 bytes) (hay que expresarlo en palabras de 4 bytes)
-            #Type of Service (1 byte) (valor=0)
-            #Total Length (2 bytes) (cabecera + payload)
-            #Identification (2 bytes) (IPID)
-            #Flags(3 bits)
-            #Offset (13 bits) (hay que expresarlo en palabras de 8 bytes)
-            #Time to Live (1 byte) (valor=64)
-            #Protocol (1 byte) (ICMP=1, TCP=16, UDP=17)
-            #Header Checksum (2 bytes)
-            #Direccion IP origen (4 bytes)
-            #Direccion IP destino (4 bytes)
-            #Opciones (tam variable) (min=0 bytes, max=40 bytes) (multiplo 4 bytes)
- 
-
-            version_ihl = 4 << 4 | int(IHL/4)
+    for i in range(0, numFragm):
+        
+        #Version (4 bits) (valor=4)
+        #IHL (4 bits) (min=20 bytes, max=60 bytes) (hay que expresarlo en palabras de 4 bytes)
+        #Type of Service (1 byte) (valor=0)
+        #Total Length (2 bytes) (cabecera + payload)
+        #Identification (2 bytes) (IPID)
+        #Flags(3 bits)
+        #Offset (13 bits) (hay que expresarlo en palabras de 8 bytes)
+        #Time to Live (1 byte) (valor=64)
+        #Protocol (1 byte) (ICMP=1, TCP=16, UDP=17)
+        #Header Checksum (2 bytes)
+        #Direccion IP origen (4 bytes)
+        #Direccion IP destino (4 bytes)
+        #Opciones (tam variable) (min=0 bytes, max=40 bytes) (multiplo 4 bytes)
 
 
-            payload = cantidadMax
+        #Juntamos los campos 'version' e 'ihl'
+        version_ihl = 4 << 4 | int(IHL/4)
+
+
+        #Calculamos la cantidad de datos para cada fragmento
+        if fragmentar is True:
+            #Para el ultimo fragmento, calculamos los datos que nos quedan por enviar
             if i+1 == numFragm:
                 payload = totalDatos - (cantidadMax * i)
-
-            totalLength = IHL + payload
-                        
-
-            MF = 1
-            if i+1 == numFragm:
-                MF = 0
-
-            offset = (cantidadMax * i)/8
-            flags_offset = MF << 13 | int(offset/8)
-
-    
-            #Construimos la cabera, con el checksum=0, luego lo calcularemos
-            header += struct.pack('!BBHHHBBHII',
-                                    version_ihl,
-                                    DEFAULT_TOS,
-                                    totalLength,
-                                    IPID,
-                                    flags_offset,
-                                    DEFAULT_TTL,
-                                    protocol,
-                                    0,
-                                    myIP,
-                                    dstIP
-                                    )
-
-            
-            #Si existen opciones, añadirlos al fragmento
-            if ipOpts is not None:
-                header += struct.pack('%ds' %(len(ipOpts)), bytes(ipOpts))
-
-            
-            #Calculamos el checksum 
-            checksum = chksum(header)
-
-
-            #Creamos la cabecera definitiva, con el nuevo checksum calculado
-            h = header[0: 10] + struct.pack('!H', checksum) + header[12: 20]
-
-            if ipOpts is not None:
-                h += header[20: 20 + len(ipOpts)]
-
-
-            #Creamos el fragmento
-            offset = offset * 8
-            fragment = h + data[offset: offset + payload]
-
-
-            #Si la direccion IP destino esta en mi subred, enviamos una peticion ARP para obtener la MAC aasociada a esa IP
-            if dstIp is :
-                netmask
-                dstMac = ARPResolution(dstIP)
-
-            #Si no esta:
             else:
-                dstMac = ARPResolution(defaultGW)
-
+                payload = cantidadMax
             
-            #Enviamos el fragmento
-            sendEthernetFrame(data=fragment, len=totalLength, etherType=0x0806, dstMac=dstMac)
+            totalLength = IHL + payload
+
+        else:
+            totalLength = datagramLength
+            
+                            
+        #Juntamos los campos 'flags' y 'offset'
+        MF = 1
+        if i+1 == numFragm:
+            MF = 0
+        offset = cantidadMax * i
+        flags_offset = MF << 13 | int(offset/8)
 
 
-    else:
-        #Enviamos el datagrama directamente        
-        #sendEthernetFrame(data=datagrama, len=totalLength, etherType=0x0806, dstMac=dstMac)
+        #Construimos la cabecera con el checksum=0, ese valor lo calcularemos mas tarde
+        header += struct.pack('!BBHHHBBHII',
+                                version_ihl,
+                                DEFAULT_TOS,
+                                totalLength,
+                                IPID,
+                                flags_offset,
+                                DEFAULT_TTL,
+                                protocol,
+                                0,
+                                myIP,
+                                dstIP)
+
+        
+        #Si existen opciones, lo añadiremos
+        if ipOpts is not None:
+            header += struct.pack('%ds' %(len(ipOpts)), bytes(ipOpts))
+
+        
+        #Calculamos el checksum 
+        checksum = chksum(header)
+
+
+        #Creamos la cabecera definitiva, con el checksum calculado
+        h = header[0: 10] + struct.pack('!H', checksum) + header[12: 20]
+
+        if ipOpts is not None:
+            h += header[20: 20 + len(ipOpts)]
+
+
+        #Creamos el fragmento/datagrama
+        if fragmentar is True:
+            fragment = h + data[offset: offset + payload]
+        else:
+            datagram = h + data
+
+
+        #Si la direccion IP destino esta en mi subred, enviamos una peticion ARP para obtener la MAC aasociada a esa IP
+        if ipaddress.ip_address(dstIp) in ipaddress.ip_network(myIP):
+            dstMac = ARPResolution(dstIP)
+        else:
+            dstMac = ARPResolution(defaultGW)
+
+        
+        #Enviamos el fragmento/datagrama
+        if fragmentar is True:
+            ret = sendEthernetFrame(data=fragment, len=totalLength, etherType=0x0806, dstMac=dstMac)
+            if ret == -1:
+                return False
+        else:
+            ret = sendEthernetFrame(data=datagram, len=totalLength, etherType=0x0806, dstMac=dstMac)
+            if ret == -1:
+                return False
 
 
     #Incrementamos la ID para la datagrama

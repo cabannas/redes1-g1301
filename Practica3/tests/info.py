@@ -16,13 +16,13 @@ import ipaddress
 
 
 def getIP(interface):
-    '''
+    """
         Nombre: getIP
         Descripción: Esta función obtiene la dirección IP asociada a una interfaz. Esta funció NO debe ser modificada
         Argumentos:
             -interface: nombre de la interfaz
         Retorno: Entero de 32 bits con la dirección IP de la interfaz
-    '''
+    """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     ip = fcntl.ioctl(
         s.fileno(),
@@ -30,7 +30,7 @@ def getIP(interface):
         struct.pack('256s', (interface[:15].encode('utf-8')))
     )[20:24]
     s.close()
-    return struct.unpack('!I',ip)[0]
+    return struct.unpack('!I', ip)[0]
     
 
 def getMTU(interface):
@@ -58,18 +58,17 @@ def getNetmask(interface):
             -interface: cadena con el nombre la interfaz sobre la que consultar la máscara
         Retorno: Entero de 32 bits con el valor de la máscara de red
     '''
-    global netmask;s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     ip = fcntl.ioctl(
         s.fileno(),
        SIOCGIFNETMASK,
         struct.pack('256s', (interface[:15].encode('utf-8')))
     )[20:24]
-    s.close();netmask=ip
+    s.close()
     return struct.unpack('!I',ip)[0]
 
 
 def getDefaultGW(interface):
-	global dfw
 	'''
         Nombre: getDefaultGW
         Descripción: Esta función obteiene el gateway por defecto para una interfaz dada
@@ -84,39 +83,35 @@ def getDefaultGW(interface):
 
 
 
-
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser(description='Envía datagramas UDP o mensajes ICMP con diferentes opciones',
-	formatter_class=RawTextHelpFormatter)
-	parser.add_argument('--itf', dest='interface', default=False,help='Interfaz a abrir')
-	parser.add_argument('--dstIP',dest='dstIP',default = False,help='Dirección IP destino')
-	parser.add_argument('--debug', dest='debug', default=False, action='store_true',help='Activar Debug messages')
-	parser.add_argument('--addOptions', dest='addOptions', default=False, action='store_true',help='Añadir opciones a los datagranas IP')
-	parser.add_argument('--dataFile',dest='dataFile',default = False,help='Fichero con datos a enviar')
-	args = parser.parse_args()
-	
-	if args.debug:
-		logging.basicConfig(level = logging.DEBUG, format = '[%(asctime)s %(levelname)s]\t%(message)s')
-	else:
-		logging.basicConfig(level = logging.INFO, format = '[%(asctime)s %(levelname)s]\t%(message)s')
+    parser = argparse.ArgumentParser(description='Envía datagramas UDP o mensajes ICMP con diferentes opciones',formatter_class=RawTextHelpFormatter)
+    parser.add_argument('--itf', dest='interface', default=False,help='Interfaz a abrir')
+    parser.add_argument('--debug', dest='debug', default=False, action='store_true',help='Activar Debug messages')
+    args = parser.parse_args()
 
-	if args.interface is False:
-		logging.error('No se ha especificado interfaz')
-		parser.print_help()
-		sys.exit(-1)
-	
-	
-	
-	print()
-	
-	myIP = getIP(args.interface)
-	print('myIP: ' + str(myIP) + '\t------> ' + str(ipaddress.IPv4Address(myIP)))
+    if args.debug:
+        logging.basicConfig(level = logging.DEBUG, format = '[%(asctime)s %(levelname)s]\t%(message)s')
+    else:
+        logging.basicConfig(level = logging.INFO, format = '[%(asctime)s %(levelname)s]\t%(message)s')
 
-	mtu = getMTU(args.interface)
-	print('MTU: ' + str(mtu))
-	
-	print('Netmask: ' + str(getNetmask(args.interface)) + '\t------> ' + str(netmask[0]) + '.' + str(netmask[1]) + '.' + str(netmask[2]) + '.' + str(netmask[3]))
-	netmask = getNetmask(args.interface)
-    print('Netmask: ' + str(myIP) + '\t------> ' + str(ipaddress.IPv4Address(myIP)))
+    if args.interface is False:
+        logging.error('No se ha especificado interfaz')
+        parser.print_help()
+        sys.exit(-1)
 
-	print('DefaultGW: ' + str(getDefaultGW(args.interface)) + '\t------> ' + str(dfw))
+        
+    print('\nInformacion\n')
+
+    myIP = getIP(args.interface)
+    print('myIP: ' + str(myIP) + '\t\t------> ' + str(ipaddress.ip_address(myIP)))
+
+    mtu = getMTU(args.interface)
+    print('MTU: ' + str(mtu))
+
+    netmask = getNetmask(args.interface)
+    print('Netmask: ' + str(netmask) + '\t------> ' + str(ipaddress.ip_address(netmask)))
+
+    defaultGW = getDefaultGW(args.interface)
+    print('DefaultGW: ' + str(defaultGW) + '\t------> ' + str(ipaddress.ip_address(defaultGW)))
+
+    print()
