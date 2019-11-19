@@ -4,6 +4,7 @@ import struct
 UDP_HLEN = 8
 UDP_PROTO = 17
 
+
 def getUDPSourcePort():
     '''
         Nombre: getUDPSourcePort
@@ -19,6 +20,7 @@ def getUDPSourcePort():
     portNum =  s.getsockname()[1]
     s.close()
     return portNum
+
 
 def process_UDP_datagram(us,header,data,srcIP):
     '''
@@ -40,6 +42,17 @@ def process_UDP_datagram(us,header,data,srcIP):
         Retorno: Ninguno
           
     '''
+    protocol = struct.unpack('B', bytes(data[9: 10]))[0]
+    if protocol is not 17:
+        return
+    
+    datagram    = struct.unpack('!HHHH', data)
+    srcPort     = datagram[0]
+    dstPort     = datagram[1]
+
+    logging.debug(srcPort)
+    logging.debug(dstPort)
+    logging.debug(data)
 
 
 def sendUDPDatagram(data,dstPort,dstIP):
@@ -61,6 +74,23 @@ def sendUDPDatagram(data,dstPort,dstIP):
           
     '''
     datagram = bytes()
+    
+    #Source Port (2 Bytes)
+    #Destination Port (2 Bytes)
+    #Length (2 Bytes)
+    #Checksum (2 bytes)
+
+    srcPort = getUDPSourcePort()
+    length  = len(data)
+
+    datagram += struct.pack('!HHHH',
+                            srcPort,
+                            dstPort,
+                            UDP_HLEN + length,
+                            0)
+
+    ret = sendIPDatagram(dstIP, datagram, UDP_PROTO)
+    return ret
 
 
 def initUDP():
@@ -75,3 +105,4 @@ def initUDP():
         Retorno: Ninguno
           
     '''
+    registerIPProtocol(process_UDP_datagram, UDP_PROTO)
