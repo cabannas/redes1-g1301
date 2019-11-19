@@ -42,17 +42,14 @@ def process_UDP_datagram(us,header,data,srcIP):
         Retorno: Ninguno
           
     '''
-    protocol = struct.unpack('B', bytes(data[9: 10]))[0]
-    if protocol is not 17:
-        return
-    
-    datagram    = struct.unpack('!HHHH', data)
-    srcPort     = datagram[0]
-    dstPort     = datagram[1]
+    datagram_header = struct.unpack('!HHHH', data[0: UDP_HLEN])
+    srcPort         = datagram[0]
+    dstPort         = datagram[1]
+    data_octets     = data[UDP_HLEN: ]
 
     logging.debug(srcPort)
     logging.debug(dstPort)
-    logging.debug(data)
+    logging.debug(data_octets)
 
 
 def sendUDPDatagram(data,dstPort,dstIP):
@@ -81,14 +78,15 @@ def sendUDPDatagram(data,dstPort,dstIP):
     #Checksum (2 bytes)
 
     srcPort = getUDPSourcePort()
-    length  = len(data)
+    length  = UDP_HLEN + len(data)
 
     datagram += struct.pack('!HHHH',
                             srcPort,
                             dstPort,
-                            UDP_HLEN + length,
+                            length,
                             0)
-
+    datagram += data
+    
     ret = sendIPDatagram(dstIP, datagram, UDP_PROTO)
     return ret
 

@@ -52,3 +52,16 @@ print('\ntotal_length: ' + str(ip_header_fields[2]))
 print('\nLongitud: ' + str(len(ip_header)))
 
 print()
+
+ip_header_3_primeros_campos = struct.unpack('!BBH', ip_header[0: 4])
+print(ip_header_3_primeros_campos)
+
+if ip_header_3_primeros_campos[2] is 100:
+    print('Valor correcto: ' + str(ip_header_3_primeros_campos[2]) + '\n')
+
+
+ip_header_primer_campo_no = struct.unpack('!BHHHBBHII', ip_header[1: ])
+print(ip_header_primer_campo_no)
+
+if ip_header_primer_campo_no[2] is 42:
+    print('Valor correcto: ' + str(ip_header_primer_campo_no[2]) + '\n')
