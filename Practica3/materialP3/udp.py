@@ -45,7 +45,7 @@ def process_UDP_datagram(us,header,data,srcIP):
     datagram_header = struct.unpack('!HHHH', data[0: UDP_HLEN])
     srcPort         = datagram[0]
     dstPort         = datagram[1]
-    data_octets     = data[UDP_HLEN: ]
+    data_octets     = data[UDP_HLEN:]
 
     logging.debug(srcPort)
     logging.debug(dstPort)

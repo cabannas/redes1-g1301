@@ -137,20 +137,33 @@ def process_IP_datagram(us, header, data, srcMac):
     fmt_string = '!BBHHHBBHII'
 
     # Extraer los campos de la cabecera IP
+    version_ihl = struct.unpack('!B', bytes(data[0: 1]))[0] # La longitud comienza en el primer byte y ocupa 4 bits
+    version = version_ihl >> 4
+    IHL = version_ihl - (version * 2 ** 4)
+    IHL = IHL * 4     #IHL esta expresada en palabras de 4 bytes, hay que multiplicarlo por 4
 
-    ip_hlen = bytes(data[2:4])  # La longitud comienza en el tercer byte y ocupa 2 bytes
-    ip_header = bytes(data[0: ip_hlen])
+    ip_header = data[0: IHL]
     ip_header_fields = struct.unpack(fmt_string, ip_header)
 
+
     # Calcular el checksum
-    if not chksum(ip_header) == 0:
+    #Extraemos primero el valor del checksum y lo guardamos en una variable temporal
+    checksum_tmp = struct.unpack('!H', ip_header[10:12])[0]
+
+    #Cambiamos el valor que habia en el campo checksum de la cabecera a 0
+    h = ip_header[0: 10] + struct.pack('!H', 0) + ip_header[12: IHL]
+
+    #Volvemos a calcular el checksum de la cabecera y lo comprobamos
+    checksum_calculated = chksum(h)
+    if checksum_calculated != checksum_tmp:
         print('Error de checksum')
         return
 
     # Analizar bits de MF y offset
     flags_offset = ip_header_fields[4]
-    flags = flags_offset >> 4
-    offset = flags_offset - flags * 2 ** 4
+    flags = flags_offset >> 13
+    offset = flags_offset - (flags * 2 ** 13)
+    offset = offset * 8     #Offset esta expresada en palabras de 8 bytes, hay que multiplicarlo por 8
 
     if not offset == 0:
         print('Error de offset')
@@ -317,7 +330,7 @@ def sendIPDatagram(dstIP, data, protocol):
         # Opciones (tam variable) (min=0 bytes, max=40 bytes) (multiplo 4 bytes)
 
         # Juntamos los campos 'version' e 'ihl'
-        version_ihl = 4 << 4 | int(IHL / 4)
+        version_ihl = 4 << 4 | int(IHL/4)
 
         # Calculamos la cantidad de datos para cada fragmento
         if fragmentar is True:
