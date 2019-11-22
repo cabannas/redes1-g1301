@@ -8,7 +8,6 @@ import subprocess
 from threading import Lock
 
 import math
-import ipaddress
 
 # Semáforo global
 globalLock = Lock()
@@ -135,45 +134,41 @@ def process_IP_datagram(us, header, data, srcMac):
     """
 
     # Definimos el formato
-    fmt_string = "!BBHHHBBHII"
+    fmt_string = '!BBHHHBBHII'
 
-    # Estraer los campos de la cabecera IP
+    # Extraer los campos de la cabecera IP
 
     ip_hlen = bytes(data[2:4])  # La longitud comienza en el tercer byte y ocupa 2 bytes
-
     ip_header = bytes(data[0: ip_hlen])
-
     ip_header_fields = struct.unpack(fmt_string, ip_header)
 
     # Calcular el checksum
     if not chksum(ip_header) == 0:
-        print("Error de checksum")
+        print('Error de checksum')
         return
 
     # Analizar bits de MF y offset
     flags_offset = ip_header_fields[4]
-
     flags = flags_offset >> 4
-
     offset = flags_offset - flags * 2 ** 4
 
     if not offset == 0:
-        print("Error de offset")
+        print('Error de offset')
         return
 
     # Loggear campos
     logging.debug(ip_header_fields[2])  # Longitud de la cabecera IP
     logging.debug(ip_header_fields[3])  # IPID
-    logging.debug(flags)  # Valor de las banderas DF y MF
-    logging.debug(offset)  # Valor de offset
+    logging.debug(flags)                # Valor de las banderas DF y MF
+    logging.debug(offset)               # Valor de offset
     logging.debug(ip_header_fields[8])  # IP origen
     logging.debug(ip_header_fields[9])  # IP destino
     logging.debug(ip_header_fields[6])  # Protocolo
 
     # Comprobar funcion callback
-    if ip_header_fields[6] in protocols:
+    if str(ip_header_fields[6]) in protocols:
 
-        callback_fun = protocols.get(ip_header_fields[6])
+        callback_fun = protocols.get(str(ip_header_fields[6]))
         if callback_fun is None:
             logging.error('Error callbackFun')
             return
@@ -202,7 +197,7 @@ def registerIPProtocol(callback, protocol):
             -protocol: valor del campo protocolo de IP para el cuál se quiere registrar una función de callback.
         Retorno: Ninguno
     """
-    protocols[protocol] = callback
+    protocols[str(protocol)] = callback
 
 
 def initIP(interface, opts=None):
@@ -246,7 +241,7 @@ def initIP(interface, opts=None):
 
 def sendIPDatagram(dstIP, data, protocol):
     global IPID
-    global myIP, MTU, defaultGW, ipOpts
+    global myIP, MTU, netmask, defaultGW, ipOpts
     '''
         Nombre: sendIPDatagram
         Descripción: Esta función construye un datagrama IP y lo envía. En caso de que los datos a enviar sean muy grandes la función
@@ -344,8 +339,11 @@ def sendIPDatagram(dstIP, data, protocol):
         offset = cantidadMax * i
         flags_offset = MF << 13 | int(offset / 8)
 
+        
+        # Definimos el formato
+        fmt_string = '!BBHHHBBHII'
         # Construimos la cabecera con el checksum=0, ese valor lo calcularemos mas tarde
-        header += struct.pack('!BBHHHBBHII',
+        header += struct.pack(fmt_string,
                               version_ihl,
                               DEFAULT_TOS,
                               totalLength,
@@ -376,8 +374,9 @@ def sendIPDatagram(dstIP, data, protocol):
         else:
             datagram = h + data
 
+        
         # Si la direccion IP destino esta en mi subred, enviamos una peticion ARP para obtener la MAC aasociada a esa IP
-        if ipaddress.ip_address(dstIp) in ipaddress.ip_network(myIP):
+        if dstIP&netmask == myIP&netmask:
             dstMac = ARPResolution(dstIP)
         else:
             dstMac = ARPResolution(defaultGW)
