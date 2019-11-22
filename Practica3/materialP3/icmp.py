@@ -4,15 +4,15 @@ import struct
 
 ICMP_PROTO = 1
 
-
 ICMP_ECHO_REQUEST_TYPE = 8
 ICMP_ECHO_REPLY_TYPE = 0
 
 timeLock = Lock()
 icmp_send_times = {}
 
-def process_ICMP_message(us,header,data,srcIp):
-    '''
+
+def process_ICMP_message(us, header, data, srcIp):
+    """
         Nombre: process_ICMP_message
         Descripción: Esta función procesa un mensaje ICMP. Esta función se ejecutará por cada datagrama IP que contenga
         un 1 en el campo protocolo de IP
@@ -39,12 +39,49 @@ def process_ICMP_message(us,header,data,srcIp):
             -data: array de bytes con el conenido del mensaje ICMP
             -srcIP: dirección IP que ha enviado el datagrama actual.
         Retorno: Ninguno
-          
-    '''
-    
 
-def sendICMPMessage(data,type,code,icmp_id,icmp_seqnum,dstIP):
-    '''
+    """
+
+    # Calculamos el checksum de ICMP:
+    # TODO: resvisar a ver si esto es correcto (cabecera + datos = data)
+    if not chksum(bytes(data)) == 0:
+        print("Error de checksum")
+        return
+
+    fmt_string = "!BBHHH"
+
+    icmp_header_fields = struct.unpack(fmt_string, data[0:8])
+
+    icmp_type = icmp_header_fields[0]
+    icmp_code = icmp_header_fields[1]
+    icmp_checksum = icmp_header_fields[2]
+    icmp_identifier = icmp_header_fields[3]
+    icmp_seq_num = icmp_header_fields[4]
+
+    # Loggeamos el valor de tipo y codigo
+    logging.debug(icmp_type)
+    logging.debug(icmp_code)
+
+    # Si el tipo es ICMP_ECHO_REQUEST_TYPE
+    if icmp_type == ICMP_ECHO_REQUEST_TYPE:
+
+        # TODO: revisar el formato para data
+        sendICMPMessage(data[8:], 0, 0, icmp_identifier, icmp_seq_num, srcIp)
+
+    # Si el tipo es ICMP_ECHO_REPLY_TYPE
+    elif icmp_type == ICMP_ECHO_REPLY_TYPE:
+
+        with timeLock:
+            time_stamp_envio = icmp_send_times[(srcIp, icmp_identifier, icmp_seq_num)]
+
+        print("RTT:")
+        print(header.ts - time_stamp_envio)
+
+    return
+
+
+def sendICMPMessage(data, type, code, icmp_id, icmp_seqnum, dstIP):
+    """
         Nombre: sendICMPMessage
         Descripción: Esta función construye un mensaje ICMP y lo envía.
         Esta función debe realizar, al menos, las siguientes tareas:
@@ -58,25 +95,62 @@ def sendICMPMessage(data,type,code,icmp_id,icmp_seqnum,dstIP):
                     -Se debe proteger al acceso al diccionario usando la variable timeLock
 
                 -Llamar a sendIPDatagram para enviar el mensaje ICMP
-                
+
             -Si no:
                 -Tipo no soportado. Se devuelve False
 
         Argumentos:
             -data: array de bytes con los datos a incluir como payload en el mensaje ICMP
             -type: valor del campo tipo de ICMP
-            -code: valor del campo code de ICMP 
+            -code: valor del campo code de ICMP
             -icmp_id: entero que contiene el valor del campo ID de ICMP a enviar
             -icmp_seqnum: entero que contiene el valor del campo Seqnum de ICMP a enviar
             -dstIP: entero de 32 bits con la IP destino del mensaje ICMP
         Retorno: True o False en función de si se ha enviado el mensaje correctamente o no
-          
-    '''
-  
+
+    """
+
     message = bytes()
-   
+    message_check_0 = bytes()
+
+    # Si el campo type es ICMP_ECHO_REQUEST_TYPE o ICMP_ECHO_REPLY_TYPE
+    if type == ICMP_ECHO_REPLY_TYPE or type == ICMP_ECHO_REQUEST_TYPE:
+
+        # Construir la cabecera ICMP con checksum = 0
+        message_check_0 += struct.pack('!BBHHH', type, code, 0, icmp_id, icmp_seqnum)
+
+        # Añadir los datos al mensaje ICMP
+        message_check_0 += data
+
+        # Calcular el checksum y añadirlo al mensaje donde corresponda
+        check_sum_icmp = chksum(message_check_0)
+
+        # Construir la cabecera ICMP con checksum calculado
+        message += struct.pack('!BBHHH', type, code, check_sum_icmp, icmp_id, icmp_seqnum)
+
+        # Añadir los datos al mensaje ICMP
+        message += data
+
+        # Si type es ICMP_ECHO_REQUEST_TYPE
+        if type == ICMP_ECHO_REQUEST_TYPE:
+            # Guardar el tiempo de envío en el diccionario icmp_send_times
+            time_stamp = time.time()
+
+            with timeLock:
+                icmp_send_times[(dstIP, icmp_id, icmp_seqnum)] = time_stamp
+
+        # Llamar a sendIPDatagram para enviar el mensaje ICMP
+        sendIPDatagram(dstIP, message, ICMP_PROTO)
+
+        return True
+
+    else:
+
+        return False
+
+
 def initICMP():
-    '''
+    """
         Nombre: initICMP
         Descripción: Esta función inicializa el nivel ICMP
         Esta función debe realizar, al menos, las siguientes tareas:
@@ -85,5 +159,8 @@ def initICMP():
         Argumentos:
             -Ninguno
         Retorno: Ninguno
-          
-    '''
+
+    """
+
+    # Registramos la funcion process_ICMP_message con valor de protocolo 1
+    registerIPProtocol(process_ICMP_message, ICMP_PROTO)
