@@ -43,8 +43,12 @@ def process_ICMP_message(us, header, data, srcIp):
     """
 
     # Calculamos el checksum de ICMP:
-    # TODO: resvisar a ver si esto es correcto (cabecera + datos = data)
-    if not chksum(bytes(data)) == 0:
+    # Extraemos primero el valor del checksum y lo guardamos en una variable temporal
+    checksum_tmp = struct.unpack('!H', data[2:4])[0]
+
+    data_no_checksum = data[0:4] + struct.pack("!H", 0) + data[4:]
+
+    if not chksum(bytes(data_no_checksum)) == checksum_tmp:
         print("Error de checksum")
         return
 
@@ -121,6 +125,10 @@ def sendICMPMessage(data, type, code, icmp_id, icmp_seqnum, dstIP):
 
         # Añadir los datos al mensaje ICMP
         message_check_0 += data
+
+        # Comprobar que la longitud es par, si no añadimos un byte a 0 al final
+        if not len(message_check_0) % 2 == 0:
+            message_check_0 += struct.pack('!B', 0)
 
         # Calcular el checksum y añadirlo al mensaje donde corresponda
         check_sum_icmp = chksum(message_check_0)

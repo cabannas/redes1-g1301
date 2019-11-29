@@ -137,23 +137,22 @@ def process_IP_datagram(us, header, data, srcMac):
     fmt_string = '!BBHHHBBHII'
 
     # Extraer los campos de la cabecera IP
-    version_ihl = struct.unpack('!B', bytes(data[0: 1]))[0] # La longitud comienza en el primer byte y ocupa 4 bits
+    version_ihl = struct.unpack('!B', bytes(data[0: 1]))[0]  # La longitud comienza en el primer byte y ocupa 4 bits
     version = version_ihl >> 4
     IHL = version_ihl - (version * 2 ** 4)
-    IHL = IHL * 4     #IHL esta expresada en palabras de 4 bytes, hay que multiplicarlo por 4
+    IHL = IHL * 4  # IHL esta expresada en palabras de 4 bytes, hay que multiplicarlo por 4
 
     ip_header = data[0: IHL]
     ip_header_fields = struct.unpack(fmt_string, ip_header)
 
-
     # Calcular el checksum
-    #Extraemos primero el valor del checksum y lo guardamos en una variable temporal
+    # Extraemos primero el valor del checksum y lo guardamos en una variable temporal
     checksum_tmp = struct.unpack('!H', ip_header[10:12])[0]
 
-    #Cambiamos el valor que habia en el campo checksum de la cabecera a 0
+    # Cambiamos el valor que habia en el campo checksum de la cabecera a 0
     h = ip_header[0: 10] + struct.pack('!H', 0) + ip_header[12: IHL]
 
-    #Volvemos a calcular el checksum de la cabecera y lo comprobamos
+    # Volvemos a calcular el checksum de la cabecera y lo comprobamos
     checksum_calculated = chksum(h)
     if checksum_calculated != checksum_tmp:
         print('Error de checksum')
@@ -163,7 +162,7 @@ def process_IP_datagram(us, header, data, srcMac):
     flags_offset = ip_header_fields[4]
     flags = flags_offset >> 13
     offset = flags_offset - (flags * 2 ** 13)
-    offset = offset * 8     #Offset esta expresada en palabras de 8 bytes, hay que multiplicarlo por 8
+    offset = offset * 8  # Offset esta expresada en palabras de 8 bytes, hay que multiplicarlo por 8
 
     if not offset == 0:
         print('Error de offset')
@@ -172,8 +171,8 @@ def process_IP_datagram(us, header, data, srcMac):
     # Loggear campos
     logging.debug(ip_header_fields[2])  # Longitud de la cabecera IP
     logging.debug(ip_header_fields[3])  # IPID
-    logging.debug(flags)                # Valor de las banderas DF y MF
-    logging.debug(offset)               # Valor de offset
+    logging.debug(flags)  # Valor de las banderas DF y MF
+    logging.debug(offset)  # Valor de offset
     logging.debug(ip_header_fields[8])  # IP origen
     logging.debug(ip_header_fields[9])  # IP destino
     logging.debug(ip_header_fields[6])  # Protocolo
@@ -330,7 +329,7 @@ def sendIPDatagram(dstIP, data, protocol):
         # Opciones (tam variable) (min=0 bytes, max=40 bytes) (multiplo 4 bytes)
 
         # Juntamos los campos 'version' e 'ihl'
-        version_ihl = 4 << 4 | int(IHL/4)
+        version_ihl = 4 << 4 | int(IHL / 4)
 
         # Calculamos la cantidad de datos para cada fragmento
         if fragmentar is True:
@@ -352,7 +351,6 @@ def sendIPDatagram(dstIP, data, protocol):
         offset = cantidadMax * i
         flags_offset = MF << 13 | int(offset / 8)
 
-        
         # Definimos el formato
         fmt_string = '!BBHHHBBHII'
         # Construimos la cabecera con el checksum=0, ese valor lo calcularemos mas tarde
@@ -387,9 +385,8 @@ def sendIPDatagram(dstIP, data, protocol):
         else:
             datagram = h + data
 
-        
         # Si la direccion IP destino esta en mi subred, enviamos una peticion ARP para obtener la MAC aasociada a esa IP
-        if dstIP&netmask == myIP&netmask:
+        if dstIP & netmask == myIP & netmask:
             dstMac = ARPResolution(dstIP)
         else:
             dstMac = ARPResolution(defaultGW)
