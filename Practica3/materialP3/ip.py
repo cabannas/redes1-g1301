@@ -185,7 +185,7 @@ def process_IP_datagram(us, header, data, srcMac):
             logging.error('Error callbackFun')
             return
         # Llamamos a la funcion de nivel superior
-        callback_fun(us, header, data[ip_hlen:], ip_header_fields[8])
+        callback_fun(us, header, data[ip_header_fields[2]:], ip_header_fields[8])
 
 
 def registerIPProtocol(callback, protocol):
