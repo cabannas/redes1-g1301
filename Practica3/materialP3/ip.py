@@ -132,7 +132,7 @@ def process_IP_datagram(us, header, data, srcMac):
             -srcMac: MAC origen de la trama Ethernet que se ha recibido
         Retorno: Ninguno
     """
-
+    logging.debug('Función implementada: process_IP_datagram')
     # Definimos el formato
     fmt_string = '!BBHHHBBHII'
 
@@ -230,6 +230,7 @@ def initIP(interface, opts=None):
             -opts: array de bytes con las opciones a nivel IP a incluir en los datagramas o None si no hay opciones a añadir
         Retorno: True o False en función de si se ha inicializado el nivel o no
     '''
+    logging.debug('Función implementada: initIP')
 
     # Llamamos a initARP
     if not initARP(interface):
@@ -281,6 +282,7 @@ def sendIPDatagram(dstIP, data, protocol):
         Retorno: True o False en función de si se ha enviado el datagrama correctamente o no
           
     '''
+    logging.debug('Función implementada: sendIPDatagram')
     header = bytes()
 
     # Valores iniciales
@@ -366,10 +368,13 @@ def sendIPDatagram(dstIP, data, protocol):
                               myIP,
                               dstIP)
 
+        logging.debug(header)
+        
         # Si existen opciones, lo añadiremos
         if ipOpts is not None:
             header += struct.pack('%ds' % (len(ipOpts)), bytes(ipOpts))
 
+        #logging.debug(header)
         # Calculamos el checksum
         checksum = chksum(header)
 
@@ -391,6 +396,7 @@ def sendIPDatagram(dstIP, data, protocol):
         else:
             dstMac = ARPResolution(defaultGW)
 
+        logging.debug('len: ' + str(totalLength))
         # Enviamos el fragmento/datagrama
         if fragmentar is True:
             ret = sendEthernetFrame(data=fragment, len=totalLength, etherType=0x0806, dstMac=dstMac)

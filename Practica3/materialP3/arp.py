@@ -317,6 +317,8 @@ def process_arp_frame(us, header, data, srcMac):
     arpHeader = bytes(data[0: ARP_HLEN])  # 6 Bytes
     if arpHeader != ARPHeader:
         logging.error('No coinciden las cabeceras')
+        logging.error(arpHeader)
+        logging.error(ARPHeader)
         return
 
     # unpack se hace con bytes
