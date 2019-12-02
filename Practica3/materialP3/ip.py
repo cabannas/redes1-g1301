@@ -99,7 +99,6 @@ def getDefaultGW(interface):
     """
     p = subprocess.Popen(['ip r | grep default | awk \'{print $3}\''], stdout=subprocess.PIPE, shell=True)
     dfw = p.stdout.read().decode('utf-8')
-    print(dfw)
     return struct.unpack('!I', socket.inet_aton(dfw))[0]
 
 
@@ -233,7 +232,7 @@ def initIP(interface, opts=None):
     logging.debug('Función implementada: initIP')
 
     # Llamamos a initARP
-    if not initARP(interface):
+    if initARP(interface) is False:
         return False
 
     # Obtenemos los siguientes datos usando un semaforo
@@ -282,7 +281,7 @@ def sendIPDatagram(dstIP, data, protocol):
         Retorno: True o False en función de si se ha enviado el datagrama correctamente o no
           
     '''
-    logging.debug('Función implementada: sendIPDatagram')
+    logging.debug('Función implementada: sendIPDatagram\n')
     header = bytes()
 
     # Valores iniciales
@@ -300,6 +299,10 @@ def sendIPDatagram(dstIP, data, protocol):
     # Longitud total del datagrama IP (cabecera + payload)
     datagramLength = IHL + totalDatos
 
+    logging.debug('ipOpts: %s' % (ipOpts))
+    logging.debug('datagramLength: %d' % (datagramLength))
+    logging.debug('MTU: %d' % (MTU))
+
     if datagramLength > MTU:
         fragmentar = True
 
@@ -313,6 +316,12 @@ def sendIPDatagram(dstIP, data, protocol):
         # Calculamos el numero de fragmentos que vamos a necesitar
         # math.ceil() nos permite redondear un numero hacia arriba, ejemplo: math.ceil(1.1) = 2
         numFragm = math.ceil(totalDatos / cantidadMax)
+
+
+    logging.debug('fragmentar: %s' % (fragmentar))
+    logging.debug('cantidadMax: %s' % (cantidadMax))
+    logging.debug('numFragm: %s\n' % (numFragm))
+
 
     for i in range(0, numFragm):
 
@@ -353,6 +362,20 @@ def sendIPDatagram(dstIP, data, protocol):
         offset = cantidadMax * i
         flags_offset = MF << 13 | int(offset / 8)
 
+        logging.debug('---------------------------------')
+        logging.debug('[CABECERA IP]\n')
+        logging.debug('* version_ihl: %d' % (version_ihl))
+        logging.debug('* tos: %d' % (DEFAULT_TOS))
+        logging.debug('* totalLength: %d' % (totalLength))
+        logging.debug('* id: %d' % (IPID))
+        logging.debug('* flags_offset: %d' % (flags_offset))
+        logging.debug('* ttl: %d' % (DEFAULT_TTL))
+        logging.debug('* protocol: %d' % (protocol))
+        logging.debug('* checksum: %d' % (0))
+        logging.debug('* myIP: %d' % (myIP))
+        logging.debug('* dstIP: %d' % (dstIP))
+        logging.debug('---------------------------------\n')
+
         # Definimos el formato
         fmt_string = '!BBHHHBBHII'
         # Construimos la cabecera con el checksum=0, ese valor lo calcularemos mas tarde
@@ -368,35 +391,48 @@ def sendIPDatagram(dstIP, data, protocol):
                               myIP,
                               dstIP)
 
-        logging.debug(header)
+        logging.debug('IP HEADER (checksum = 0):')
+        logging.debug(str(header) + '\n')
         
         # Si existen opciones, lo añadiremos
         if ipOpts is not None:
             header += struct.pack('%ds' % (len(ipOpts)), bytes(ipOpts))
 
-        #logging.debug(header)
         # Calculamos el checksum
         checksum = chksum(header)
 
         # Creamos la cabecera definitiva, con el checksum calculado
         h = header[0: 10] + struct.pack('!H', checksum) + header[12: 20]
-
+        
         if ipOpts is not None:
             h += header[20: 20 + len(ipOpts)]
+
+        logging.debug('IP HEADER (checksum = %d):' % (checksum))
+        logging.debug(str(h) + '\n')
+        
+        logging.debug('IP DATA:')
+        logging.debug(str(data) + '\n')
+
 
         # Creamos el fragmento/datagrama
         if fragmentar is True:
             fragment = h + data[offset: offset + payload]
+            logging.debug('IP FRAGMENT:')
+            logging.debug(str(fragment) + '\n')
         else:
             datagram = h + data
+            logging.debug('IP DATAGRAM:')
+            logging.debug(str(datagram) + '\n')
+
 
         # Si la direccion IP destino esta en mi subred, enviamos una peticion ARP para obtener la MAC aasociada a esa IP
         if dstIP & netmask == myIP & netmask:
+            logging.debug('dstIP -> ARPResolution')
             dstMac = ARPResolution(dstIP)
         else:
+            logging.debug('defaultGW -> ARPResolution')
             dstMac = ARPResolution(defaultGW)
 
-        logging.debug('len: ' + str(totalLength))
         # Enviamos el fragmento/datagrama
         if fragmentar is True:
             ret = sendEthernetFrame(data=fragment, len=totalLength, etherType=0x0806, dstMac=dstMac)
