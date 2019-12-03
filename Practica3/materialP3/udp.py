@@ -42,17 +42,20 @@ def process_UDP_datagram(us, header, data, srcIP):
         Retorno: Ninguno
 
     """
-    logging.debug('Función implementada: process_UDP_datagram')
+    logging.debug('Función implementada: process_UDP_datagram\n')
 
     datagram_header = struct.unpack('!HHHH', data[0: UDP_HLEN])
     srcPort = datagram_header[0]
     dstPort = datagram_header[1]
     data_octets = data[UDP_HLEN:]
 
-    logging.debug(srcPort)
-    logging.debug(dstPort)
-    logging.debug(data_octets)
-
+    logging.debug('----------------------')
+    logging.debug('[UDP RESULT]')
+    logging.debug('* srcPort: ' + str(srcPort))
+    logging.debug('* dstPort: ' + str(dstPort))
+    logging.debug('* data_octets: ' + str(data_octets))
+    logging.debug('----------------------\n')
+    
 
 def sendUDPDatagram(data, dstPort, dstIP):
     """
@@ -109,5 +112,5 @@ def initUDP():
         Retorno: Ninguno
 
     """
-    logging.debug('Función implementada: initUDP')
+    logging.debug('Función implementada: initUDP\n')
     registerIPProtocol(process_UDP_datagram, UDP_PROTO)

@@ -63,25 +63,13 @@ def process_Ethernet_frame(us,header,data):
         Retorno:
             -Ninguno
     '''
-    logging.debug('Trama nueva. Función implementada: process_Ethernet_frame')
+    logging.debug('Trama nueva. Función implementada: process_Ethernet_frame\n')
     global macAddress
-
-    '''
-    print('------------------------------------------------------------------')
-    print('process_Ethernet_frame')
-    '''
 
     #Implementacion del código que procesa una trama Ethernet en recepción
     dstMac    = bytes(data[0:6])
     srcMac    = bytes(data[6:12])
     ethertype = bytes(data[12:14])
-
-    '''
-    print('dstMac:    ' + str(dstMac))
-    print('srcMac:    ' + str(srcMac))
-    print('ethertype: ' + str(ethertype))
-    print('myMAC:     ' + str(macAddress))
-    '''
     
     if dstMac != macAddress and dstMac != broadcastAddr:
         return
@@ -153,7 +141,7 @@ def registerCallback(callback_func, ethertype):
     '''
     global upperProtos
     #upperProtos es el diccionario que relaciona función de callback y ethertype
-    logging.debug('Función implementada: registerCallback')
+    logging.debug('Función implementada: registerCallback\n')
     
     upperProtos[ethertype] = callback_func
 
@@ -174,7 +162,7 @@ def startEthernetLevel(interface):
     '''
     global macAddress,handle,levelInitialized,recvThread
     handle = None
-    logging.debug('Función implementada: startEthernetLevel')
+    logging.debug('Función implementada: startEthernetLevel\n')
     
     #Inicialización de la interfaz y de las variables globales
     try:
@@ -184,6 +172,7 @@ def startEthernetLevel(interface):
     else:
         logging.error('El nivel Ethernet ya estaba inicializado')
         return -1
+
 
     macAddress = getHwAddr(interface)
     errbuf     = bytearray()
@@ -215,7 +204,7 @@ def stopEthernetLevel():
         Argumentos: Ninguno
         Retorno: 0 si todo es correcto y -1 en otro caso
     '''
-    logging.debug('Función implementada: stopEthernetLevel')
+    logging.debug('Función implementada: stopEthernetLevel\n')
 
     if handle is None or recvThread is None:
         logging.error('Error al liberar recursos')
@@ -246,12 +235,7 @@ def sendEthernetFrame(data,len,etherType,dstMac):
         Retorno: 0 si todo es correcto, -1 en otro caso
     '''
     global macAddress,handle
-    logging.debug('Función implementada: sendEthernetFrame')
-    
-    '''
-    print('------------------------------------------------------------------')
-    print('sendEthernetFrame')
-    '''
+    logging.debug('Función implementada: sendEthernetFrame\n')
     
     # Estructura de la trama Ethernet:
     # trama     = cabecera + payload
@@ -260,9 +244,6 @@ def sendEthernetFrame(data,len,etherType,dstMac):
 
     #dstMac y macAddress ya son objetos bytes
     trama = struct.pack('!6s6sH', dstMac, macAddress, etherType) + data
-    '''
-    print('cabecera: ' + str(struct.pack('!6s6sH', dstMac, macAddress, etherType)))
-    '''
 
     #dstMac (6 Bytes) + macAddress (6 Bytes) + etherType (2 Bytes) = 14
     size = 14 + len

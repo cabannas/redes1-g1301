@@ -32,6 +32,20 @@ def getIP(interface):
     s.close()
     return struct.unpack('!I', ip)[0]
     
+def getHwAddr(interface):
+    '''
+        Nombre: getHwAddr
+        Descripción: Esta función obtiene la dirección MAC asociada a una interfaz
+        Argumentos:
+            -interface: Cadena con el nombre de la interfaz
+        Retorno:
+            -Dirección MAC de la itnerfaz
+    '''
+    s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
+    s.bind((interface,0))
+    mac =  (s.getsockname()[4])
+    s.close()
+    return mac
 
 def getMTU(interface):
     '''
@@ -103,15 +117,18 @@ if __name__ == "__main__":
     print('\nInformacion\n')
 
     myIP = getIP(args.interface)
-    print('myIP: ' + str(myIP) + '\t\t------> ' + str(ipaddress.ip_address(myIP)))
+    print('myIP: ' + str(myIP) + '\t\t\t------> ' + str(ipaddress.ip_address(myIP)))
+
+    myMAC = getHwAddr(args.interface) 
+    print('myMAC: ' + str(myMAC) + '\t------> ' + str(myMAC.hex()))
 
     mtu = getMTU(args.interface)
     print('MTU: ' + str(mtu))
 
     netmask = getNetmask(args.interface)
-    print('Netmask: ' + str(netmask) + '\t------> ' + str(ipaddress.ip_address(netmask)))
+    print('Netmask: ' + str(netmask) + '\t\t------> ' + str(ipaddress.ip_address(netmask)))
 
     defaultGW = getDefaultGW(args.interface)
-    print('DefaultGW: ' + str(defaultGW) + '\t------> ' + str(ipaddress.ip_address(defaultGW)))
+    print('DefaultGW: ' + str(defaultGW) + '\t\t------> ' + str(ipaddress.ip_address(defaultGW)))
 
     print()
