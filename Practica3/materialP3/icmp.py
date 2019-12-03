@@ -41,6 +41,7 @@ def process_ICMP_message(us, header, data, srcIp):
         Retorno: Ninguno
 
     """
+    logging.debug('Función implementada: process_ICMP_message\n')
 
     # Calculamos el checksum de ICMP:
     # Extraemos primero el valor del checksum y lo guardamos en una variable temporal
@@ -49,7 +50,7 @@ def process_ICMP_message(us, header, data, srcIp):
     data_no_checksum = data[0:4] + struct.pack("!H", 0) + data[4:]
 
     if not chksum(bytes(data_no_checksum)) == checksum_tmp:
-        print("Error de checksum")
+        logging.error("[ICMP] Error de checksum")
         return
 
     fmt_string = "!BBHHH"
@@ -84,6 +85,7 @@ def process_ICMP_message(us, header, data, srcIp):
     return
 
 
+
 def sendICMPMessage(data, type, code, icmp_id, icmp_seqnum, dstIP):
     """
         Nombre: sendICMPMessage
@@ -113,6 +115,7 @@ def sendICMPMessage(data, type, code, icmp_id, icmp_seqnum, dstIP):
         Retorno: True o False en función de si se ha enviado el mensaje correctamente o no
 
     """
+    logging.debug('Función implementada: sendICMPMessage\n')
 
     message = bytes()
     message_check_0 = bytes()
@@ -152,9 +155,8 @@ def sendICMPMessage(data, type, code, icmp_id, icmp_seqnum, dstIP):
 
         return True
 
-    else:
+    return False
 
-        return False
 
 
 def initICMP():
@@ -169,6 +171,7 @@ def initICMP():
         Retorno: Ninguno
 
     """
+    logging.debug('Función implementada: initICMP\n')
 
     # Registramos la funcion process_ICMP_message con valor de protocolo 1
     registerIPProtocol(process_ICMP_message, ICMP_PROTO)
