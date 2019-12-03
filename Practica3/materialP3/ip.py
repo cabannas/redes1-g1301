@@ -175,8 +175,7 @@ def process_IP_datagram(us, header, data, srcMac):
     offset = offset * 8  # Offset esta expresada en palabras de 8 bytes, hay que multiplicarlo por 8
 
 
-    if not offset == 0:
-        logging.debug('Error de offset')
+    if offset != 0:
         return
 
     srcIP = ip_header_fields[8]
@@ -304,7 +303,6 @@ def sendIPDatagram(dstIP, data, protocol):
           
     '''
     logging.debug('Función implementada: sendIPDatagram\n')
-    header = bytes()
 
     # Valores iniciales
     IHL = IP_MIN_HLEN  # Longitud minima de la cabecera
@@ -392,7 +390,7 @@ def sendIPDatagram(dstIP, data, protocol):
         # Definimos el formato
         fmt_string = '!BBHHHBBHII'
         # Construimos la cabecera con el checksum=0, ese valor lo calcularemos mas tarde
-        header += struct.pack(fmt_string,
+        header = struct.pack(fmt_string,
                               version_ihl,
                               DEFAULT_TOS,
                               totalLength,
@@ -440,11 +438,6 @@ def sendIPDatagram(dstIP, data, protocol):
         logging.debug('------------------------------------------------')
         logging.debug('[IP] HEADER (checksum = %d):' % (checksum))
         logging.debug(h)
-        logging.debug('------------------------------------------------\n')
-
-        logging.debug('------------------------------------------------')
-        logging.debug('[IP] DATA (%d bytes):' % (len(data)))
-        logging.debug(data)
         logging.debug('------------------------------------------------\n')
 
 
