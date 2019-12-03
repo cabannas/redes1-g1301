@@ -1,0 +1,55 @@
+Ejecución de pruebas:
+Para realizar las pruebas durante el desarrollo y la validación final se hará uso de la herramienta Mininet. Se puede
+revisar el funcionamiento de dicha herramienta en el documento de entorno de trabajo al inicio de la sección de
+prácticas. Ejecutaremos al menos 4 tipos de pruebas:
+1. Pruebas de envío de datagramas UDP:
+1. Partiremos de la configuración básica en la que hay 2 hosts (h1 y h2).
+2. Ejecutaremos nuestro programa en h1 y h2 con la bandera --debug y con la IP destino de h2 y h1
+respectivamente.
+3. En una nueva terminal de h2 ejecutaremos Wireshark
+4. Desde h1 enviaremos un datagrama UDP
+5. Comprobaremos en Wireshark que el datagrama UDP (y el IP sobre el que está transportado) son correctos
+6. Comprobaremos en h2 que la salida de logging.debug muestra por pantalla los campos solicitados
+7. Repetiremos la misma prueba con la opción del programa --addOptions
+8. Repetiremos la prueba original con la opción --dataFile pasando un archivo de más de 3000 caracteres
+9. Repetiremos la prueba anterior cambiando la MTU de la interfaz a un valor más bajo (por ejemplo 658)
+2. Pruebas de envío de ICMP:
+1. Partiremos de la configuración básica en la que hay dos hosts (h1 y h2).
+2. Ejecutaremos nuestro programa en h1 y h2 con la bandera --debug y con la IP destino de h2 y h1
+respectivamente.
+3. En una nueva terminal de h2 ejecutaremos Wireshark
+4. Desde h1 enviaremos un mensaje de tipo Echo Request a h2
+5. Comprobaremos en Wireshark que tanto el mensaje ICMP Echo Request como el ICMP Echo Reply generados son
+correctos. Si todo es correcto deberemos observar 2 mensajes ICMP Echo Reply. Uno corresponde al generado por
+nuestro programa y otro corresponde al generado por el sistema operativo.
+6. Comprobaremos en h2 que la salida de logging.debug muestra por pantalla los campos solicitados
+7. Comprobaremos en h que se muestra por pantalla la estimación del RTT
+8. Repetiremos la misma prueba con la opción del programa --addOptions
+3. Pruebas de envío de datagramas UDP a hosts fuera de la subred:
+1. Partiremos de la configuración básica en la que hay dos hosts (h1 y h2).
+2. Ejecutaremos nuestro programa en h1 usando como dirección IP destino una dirección de fuera de la subred (por
+ejemplo 8.8.8.8)
+3. En una nueva terminal de h1 ejecutaremos Wireshark
+4. Realizaremos el envío del datagrama UDP
+5. Analizaremos en Wireshark que la dirección MAC destino presente en la trama Ethernet se corresponde con la
+MAC del gateway (10.0.0.3)
+4. Pruebas de compatibilidad con ping estándar de Linux:
+1. Partiremos de la configuración básica en la que hay dos hosts (h1 y h2).
+2. Ejecutaremos nuestro programa en h1 usando como dirección IP cualquiera (por ejemplo 8.8.8.8 pues va a ser
+irrelevante)
+3. En una nueva terminal de h1 ejecutaremos Wireshark
+https://moodle.uam.es/mod/page/view.php?id=1253002
+19/11/2019
+2019_17835_130_2:
+Práctica 3: IP, UDP e ICMP
+4. Desde una terminal en h2 ejecutaremos ping
+10.0.0.1
+5. Analizaremos en h2 que la salida del comando ping indica que hay respuestas duplicadas. Si esto no ocurre
+entonces el programa no será correcto ni compatible. A continuación se muestra un ejemplo de salida donde esto
+ocurre:
+64 bytes from 10.0.0.1: icmp_seq=1 ttl=64 time=220 ms (DUP!)
+Para todas las pruebas se recomienda el uso de Wireshark para validar la correcta construcción y envío de datos.
+Operaciones a nivel de bit
+En Python la unidad mínima de información que se puede declarar de manera estándar es un byte. En muchas
+ocasiones los protocolos que analizaremos o construiremos usarán campos a nivel de bit. Para ello debemos saber
+manejar este tipo de situaciones.

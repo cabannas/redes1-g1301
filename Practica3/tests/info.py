@@ -96,6 +96,23 @@ def getDefaultGW(interface):
 	return struct.unpack('!I',socket.inet_aton(dfw))[0]
 
 
+def getUDPSourcePort():
+    """
+        Nombre: getUDPSourcePort
+        Descripción: Esta función obtiene un puerto origen libre en la máquina actual.
+        Argumentos:
+            -Ninguno
+        Retorno: Entero de 16 bits con el número de puerto origen disponible
+
+    """
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.bind(('', 0))
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    portNum = s.getsockname()[1]
+    s.close()
+    return portNum
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Envía datagramas UDP o mensajes ICMP con diferentes opciones',formatter_class=RawTextHelpFormatter)
@@ -130,5 +147,8 @@ if __name__ == "__main__":
 
     defaultGW = getDefaultGW(args.interface)
     print('DefaultGW: ' + str(defaultGW) + '\t\t------> ' + str(ipaddress.ip_address(defaultGW)))
+
+    srcPort = getUDPSourcePort()
+    print('srcPort: ' + str(srcPort))
 
     print()

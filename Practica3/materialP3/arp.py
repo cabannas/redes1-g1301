@@ -88,9 +88,9 @@ def processARPRequest(data, MAC):
             -MAC: dirección MAC origen extraída por el nivel Ethernet
         Retorno: Ninguno
     """
-    logging.debug('Función implementada: processARPRequest\n')
     global myIP
-
+    logging.debug('Función implementada: processARPRequest\n')
+    
     srcMac = bytes(data[8: 14])  # Sender Eth(6 Bytes)
 
     if srcMac != MAC:
@@ -177,15 +177,15 @@ def createARPRequest(ip):
     frame = bytes()
     logging.debug('Función implementada: createARPRequest\n')
 
-    frame += struct.pack('!H', 0x0001)  # Hardware Type (2 Bytes) Ethernet
-    frame += struct.pack('!H', 0x0800)  # Protocol Type (2 Bytes) IP
-    frame += struct.pack('B', 6)  # Hardware Size (1 Byte) Ethernet
-    frame += struct.pack('B', 4)  # Protocol Size (1 Byte) IP
-    frame += struct.pack('!H', 0x0001)  # Opcode (2 Bytes) Request
-    frame += struct.pack('6s', myMAC)  # Sender Eth (6 Bytes), myMAC ya es un objeto bytes
-    frame += struct.pack('!I', myIP)  # Sender IP (4 Bytes), myIP es un numero entero
-    frame += struct.pack('6s', bytes([0x00] * 6))  # Target Eth (6 bytes)
-    frame += struct.pack('!I', ip)  # Target IP (4 Bytes), ip es un numero entero
+    frame += struct.pack('!H', 0x0001)              # Hardware Type (2 Bytes) Ethernet
+    frame += struct.pack('!H', 0x0800)              # Protocol Type (2 Bytes) IP
+    frame += struct.pack('B', 6)                    # Hardware Size (1 Byte) Ethernet
+    frame += struct.pack('B', 4)                    # Protocol Size (1 Byte) IP
+    frame += struct.pack('!H', 0x0001)              # Opcode (2 Bytes) Request
+    frame += struct.pack('6s', myMAC)               # Sender Eth (6 Bytes), myMAC ya es un objeto bytes
+    frame += struct.pack('!I', myIP)                # Sender IP (4 Bytes), myIP es un numero entero
+    frame += struct.pack('6s', bytes([0x00] * 6))   # Target Eth (6 bytes)
+    frame += struct.pack('!I', ip)                  # Target IP (4 Bytes), ip es un numero entero
 
     return frame
 
@@ -203,15 +203,15 @@ def createARPReply(IP, MAC):
     frame = bytes()
     logging.debug('Función implementada: createARPReply\n')
 
-    frame += struct.pack('!H', 0x0001)  # Hardware Type (2 Bytes) Ethernet
-    frame += struct.pack('!H', 0x0800)  # Protocol Type (2 Bytes) IP
-    frame += struct.pack('B', 6)  # Hardware Size (1 Byte) Ethernet
-    frame += struct.pack('B', 4)  # Protocol Size (1 Byte) IP
-    frame += struct.pack('!H', 0x0002)  # Opcode (2 Bytes) Request
-    frame += struct.pack('6s', myMAC)  # Sender Eth (6 Bytes), myMAC ya es un objeto bytes
-    frame += struct.pack('!I', myIP)  # Sender IP (4 Bytes), myIP es un numero entero
+    frame += struct.pack('!H', 0x0001)      # Hardware Type (2 Bytes) Ethernet
+    frame += struct.pack('!H', 0x0800)      # Protocol Type (2 Bytes) IP
+    frame += struct.pack('B', 6)            # Hardware Size (1 Byte) Ethernet
+    frame += struct.pack('B', 4)            # Protocol Size (1 Byte) IP
+    frame += struct.pack('!H', 0x0002)      # Opcode (2 Bytes) Request
+    frame += struct.pack('6s', myMAC)       # Sender Eth (6 Bytes), myMAC ya es un objeto bytes
+    frame += struct.pack('!I', myIP)        # Sender IP (4 Bytes), myIP es un numero entero
     frame += struct.pack('6s', bytes(MAC))  # Target Eth (6 bytes)
-    frame += struct.pack('!I', IP)  # Target IP (4 Bytes)
+    frame += struct.pack('!I', IP)          # Target IP (4 Bytes)
 
     return frame
 
@@ -328,10 +328,8 @@ def ARPResolution(ip):
     while peticiones_enviadas < 3:
 
         # Enviar peticion
-        print('\nIntento: ' + str(peticiones_enviadas + 1))
+        print('(Intento: %d) Enviando peticion...' % (peticiones_enviadas + 1))
         sendEthernetFrame(data=trama_arp, len=len(trama_arp), etherType=0x0806, dstMac=broadcastAddr)
-        print('-> Peticion enviada')
-        print('Esperando respuesta ...')
         time.sleep(1)
 
         with globalLock:

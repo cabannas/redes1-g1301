@@ -63,8 +63,9 @@ def process_Ethernet_frame(us,header,data):
         Retorno:
             -Ninguno
     '''
-    logging.debug('Trama nueva. Función implementada: process_Ethernet_frame\n')
     global macAddress
+    logging.debug('Trama nueva. Función implementada: process_Ethernet_frame\n')
+    
 
     #Implementacion del código que procesa una trama Ethernet en recepción
     dstMac    = bytes(data[0:6])

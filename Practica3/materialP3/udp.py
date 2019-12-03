@@ -22,6 +22,7 @@ def getUDPSourcePort():
     return portNum
 
 
+
 def process_UDP_datagram(us, header, data, srcIP):
     """
         Nombre: process_UDP_datagram
@@ -49,13 +50,14 @@ def process_UDP_datagram(us, header, data, srcIP):
     dstPort = datagram_header[1]
     data_octets = data[UDP_HLEN:]
 
-    logging.debug('----------------------')
-    logging.debug('[UDP RESULT]')
-    logging.debug('* srcPort: ' + str(srcPort))
-    logging.debug('* dstPort: ' + str(dstPort))
+    logging.debug('------------------------------------------------')
+    logging.debug('[UDP] RESULT:')
+    logging.debug('* srcPort    : ' + str(srcPort))
+    logging.debug('* dstPort    : ' + str(dstPort))
     logging.debug('* data_octets: ' + str(data_octets))
-    logging.debug('----------------------\n')
+    logging.debug('------------------------------------------------\n')
     
+
 
 def sendUDPDatagram(data, dstPort, dstIP):
     """
@@ -93,11 +95,14 @@ def sendUDPDatagram(data, dstPort, dstIP):
                             0)
     datagram += bytes(data)
 
-    logging.debug('UDP DATAGRAM (%d bytes):' % (len(datagram)))
-    logging.debug(str(datagram) + '\n\n\n')
+    logging.debug('------------------------------------------------')
+    logging.debug('[UDP] DATAGRAM (%d bytes):' % (len(datagram)))
+    logging.debug(datagram)
+    logging.debug('------------------------------------------------\n')
 
     ret = sendIPDatagram(dstIP, datagram, UDP_PROTO)
     return ret
+
 
 
 def initUDP():
