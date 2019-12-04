@@ -77,7 +77,7 @@ def process_Ethernet_frame(us,header,data):
 
     callbackFun = upperProtos.get('0x' + str(ethertype.hex()))
     if callbackFun is None:
-        logging.error('Error callbackFun')
+        logging.error('[ENET] Error callbackFun')
         return
     
     #Llamamos a la funcion de nivel superiorr
@@ -143,7 +143,6 @@ def registerCallback(callback_func, ethertype):
     global upperProtos
     #upperProtos es el diccionario que relaciona función de callback y ethertype
     logging.debug('Función implementada: registerCallback\n')
-    
     upperProtos[ethertype] = callback_func
 
 
@@ -171,7 +170,7 @@ def startEthernetLevel(interface):
     except NameError:
         levelInitialized = False
     else:
-        logging.error('El nivel Ethernet ya estaba inicializado')
+        logging.error('[ENET] El nivel Ethernet ya estaba inicializado')
         return -1
 
 
@@ -180,7 +179,7 @@ def startEthernetLevel(interface):
     handle     = pcap_open_live(interface, ETH_FRAME_MAX, PROMISC, TO_MS, errbuf)
 
     if handle is None:
-        logging.error('Error al abrir interfaz')
+        logging.error('[ENET] Error al abrir interfaz')
         return -1
 
     #Una vez hemos abierto la interfaz para captura y hemos inicializado las variables globales (macAddress, handle y levelInitialized) arrancamos
@@ -208,7 +207,7 @@ def stopEthernetLevel():
     logging.debug('Función implementada: stopEthernetLevel\n')
 
     if handle is None or recvThread is None:
-        logging.error('Error al liberar recursos')
+        logging.error('[ENET] Error al liberar recursos')
         return -1
 
     #Liberamos todos los recursos
@@ -257,7 +256,7 @@ def sendEthernetFrame(data,len,etherType,dstMac):
 
     ret = pcap_inject(handle, trama, size)
     if ret == -1:
-        logging.error('Error al enviar la trama')
+        logging.error('[ENET] Error al enviar la trama')
         return -1
 
     return 0

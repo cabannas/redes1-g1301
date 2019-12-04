@@ -5,6 +5,7 @@ UDP_HLEN = 8
 UDP_PROTO = 17
 
 
+
 def getUDPSourcePort():
     """
         Nombre: getUDPSourcePort
@@ -46,15 +47,15 @@ def process_UDP_datagram(us, header, data, srcIP):
     logging.debug('Función implementada: process_UDP_datagram\n')
 
     datagram_header = struct.unpack('!HHHH', data[0: UDP_HLEN])
-    srcPort = datagram_header[0]
-    dstPort = datagram_header[1]
+    srcPort     = datagram_header[0]
+    dstPort     = datagram_header[1]
     data_octets = data[UDP_HLEN:]
 
     logging.debug('------------------------------------------------')
-    logging.debug('[UDP] RESULT:')
-    logging.debug('* srcPort    : ' + str(srcPort))
-    logging.debug('* dstPort    : ' + str(dstPort))
-    logging.debug('* data_octets: ' + str(data_octets))
+    logging.debug('[UDP] DATAGRAM (%d bytes)' % (len(data)))
+    logging.debug('* Puerto origen   : ' + str(srcPort))
+    logging.debug('* Puerto destino  : ' + str(dstPort))
+    logging.debug('* Datos contenidos: ' + str(data_octets))
     logging.debug('------------------------------------------------\n')
     
 
@@ -80,13 +81,8 @@ def sendUDPDatagram(data, dstPort, dstIP):
     logging.debug('Función implementada: sendUDPDatagram\n')
     datagram = bytes()
 
-    # Source Port (2 Bytes)
-    # Destination Port (2 Bytes)
-    # Length (2 Bytes)
-    # Checksum (2 bytes)
-
     srcPort = getUDPSourcePort()
-    length = UDP_HLEN + len(data)
+    length  = UDP_HLEN + len(data)
 
     datagram += struct.pack('!HHHH',
                             srcPort,
@@ -95,10 +91,12 @@ def sendUDPDatagram(data, dstPort, dstIP):
                             0)
     datagram += bytes(data)
 
+    # NOTA: BORRAR
     logging.debug('------------------------------------------------')
     logging.debug('[UDP] DATAGRAM (%d bytes):' % (len(datagram)))
     logging.debug(datagram)
     logging.debug('------------------------------------------------\n')
+    # NOTA: BORRAR
 
     ret = sendIPDatagram(dstIP, datagram, UDP_PROTO)
     return ret

@@ -91,14 +91,14 @@ def processARPRequest(data, MAC):
     global myIP
     logging.debug('Función implementada: processARPRequest\n')
     
-    srcMac = bytes(data[8: 14])  # Sender Eth(6 Bytes)
+    srcMac = bytes(data[8: 14]) # Sender Eth(6 Bytes)
 
     if srcMac != MAC:
-        logging.error('src != MAC')
+        logging.error('[ARP] src != MAC')
         return
 
-    srcIp = bytes(data[14: 18])  # Sender IP (4 Bytes)
-    dstIp = bytes(data[24: 28])  # Target IP (4 Bytes)
+    srcIp = bytes(data[14: 18]) # Sender IP (4 Bytes)
+    dstIp = bytes(data[24: 28]) # Target IP (4 Bytes)
 
 
     if dstIp != struct.pack('!I', myIP):
@@ -134,15 +134,15 @@ def processARPReply(data, MAC):
     global requestedIP, resolvedMAC, awaitingResponse, cache
     logging.debug('Función implementada: processARPReply\n')
 
-    srcMac = bytes(data[8: 14])  # Sender Eth(6 Bytes)
+    srcMac = bytes(data[8: 14]) # Sender Eth(6 Bytes)
 
     if srcMac != MAC:
-        logging.error('srcMac != MAC')
+        logging.error('[ARP] srcMac != MAC')
         return
 
-    srcIp = bytes(data[14: 18])  # Sender IP (4 Bytes)
-    dstMac = bytes(data[18: 24])  # Target Eth(6 Bytes)
-    dstIp = bytes(data[24: 28])  # Target IP (4 Bytes)
+    srcIp  = bytes(data[14: 18])    # Sender IP (4 Bytes)
+    dstMac = bytes(data[18: 24])    # Target Eth(6 Bytes)
+    dstIp  = bytes(data[24: 28])    # Target IP (4 Bytes)
 
 
     if dstIp != struct.pack('!I', myIP):
@@ -238,14 +238,14 @@ def process_arp_frame(us, header, data, srcMac):
     logging.debug('Función implementada: process_arp_frame\n')
 
     if '0x0806' not in upperProtos:
-        logging.error('0x0806 no esta registrado')
+        logging.error('[ARP] 0x0806 no esta registrado')
         return
 
     # data es un bytearray, para coger sus campos necesitamos usar la funcion bytes()
-    arpHeader = bytes(data[0: ARP_HLEN])  # 6 Bytes
+    arpHeader = bytes(data[0: ARP_HLEN])    # 6 Bytes
     
     if arpHeader != ARPHeader:
-        logging.error('No coinciden las cabeceras')
+        logging.error('[ARP] No coinciden las cabeceras')
         logging.error(arpHeader)
         logging.error(ARPHeader)
         return
@@ -281,7 +281,7 @@ def initARP(interface):
     # Realiza una peticion ARP gratuita, para comprobar si la IP propia ya esta asignada o no
     print('\nARP gratuita')
     if ARPResolution(myIP) is not None:
-        logging.error('Falla la peticion ARP gratuita, ya esta asignada la propia IP')
+        logging.error('[ARP] Falla la peticion ARP gratuita, ya esta asignada la propia IP')
         return False
 
     arpInitialized = True

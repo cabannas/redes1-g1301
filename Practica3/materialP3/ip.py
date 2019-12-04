@@ -31,6 +31,7 @@ IP_MAX_HLEN = 60
 DEFAULT_TTL = 64
 
 
+
 def chksum(msg):
     """
         Nombre: chksum
@@ -144,8 +145,10 @@ def process_IP_datagram(us, header, data, srcMac):
     # Extraer los campos de la cabecera IP
     ip_header = data[0: IP_MIN_HLEN]
     ip_header_fields = struct.unpack(fmt_string, ip_header)
+    
+    # NOTA: BORRAR
     logging.debug('[IP] ip_header_fields: ' + str(ip_header_fields) + '\n')
-
+    # NOTA: BORRAR
     
     # Calcular el checksum
     # Extraemos primero el valor del checksum y lo guardamos en una variable temporal
@@ -164,7 +167,9 @@ def process_IP_datagram(us, header, data, srcMac):
     # Volvemos a calcular el checksum de la cabecera y lo comprobamos
     checksum_calculated = chksum(h)
     if checksum_calculated != checksum_tmp:
-        logging.error('Error de checksum')
+        logging.error('[IP] Error de checksum')
+        logging.error(checksum_calculated)
+        logging.error(h)
         return
 
 
@@ -183,10 +188,10 @@ def process_IP_datagram(us, header, data, srcMac):
     
     # Loggear campos
     logging.debug('------------------------------------------------')
-    logging.debug('[IP] DATAGRAM (%d bytes):' % (len(data)))
+    logging.debug('[IP] DATAGRAM (%d bytes)' % (len(data)))
     logging.debug('* IHL       : ' + str(IHL))
     logging.debug('* IPID      : ' + str(ip_header_fields[3]))
-    logging.debug('* Flags     : ' + str(flags))
+    logging.debug('* Flags(MF) : ' + str(flags))
     logging.debug('* Offset    : ' + str(offset))
     logging.debug('* IP origen : ' + str(srcIP))
     logging.debug('* IP destino: ' + str(ip_header_fields[9]))
@@ -199,11 +204,11 @@ def process_IP_datagram(us, header, data, srcMac):
 
         callback_fun = protocols.get(str(protocol))
         if callback_fun is None:
-            logging.error('Error callbackFun')
+            logging.error('[IP] Error callbackFun')
             return
 
         # Llamamos a la funcion de nivel superior
-        callback_fun(us, header, data[IHL: ], srcIP)
+        callback_fun(us, header, data[IHL:], srcIP)
 
 
 
@@ -323,10 +328,6 @@ def sendIPDatagram(dstIP, data, protocol):
     # Longitud total del datagrama IP (cabecera + payload)
     datagramLength = IHL + totalDatos
 
-    
-    logging.debug('[IP] datagramLength: ' + str(datagramLength))
-    logging.debug('[IP] MTU: ' + str(MTU))
-
 
     if datagramLength > MTU:
         fragmentar = True
@@ -342,11 +343,14 @@ def sendIPDatagram(dstIP, data, protocol):
         # math.ceil() nos permite redondear un numero hacia arriba, ejemplo: math.ceil(1.1) = 2
         numFragm = math.ceil(totalDatos / cantidadMax)
 
-
+    
+    # NOTA: BORRAR
+    logging.debug('[IP] datagramLength: ' + str(datagramLength))
+    logging.debug('[IP] MTU: ' + str(MTU))
     logging.debug('[IP] fragmentar: ' + str(fragmentar))
     logging.debug('[IP] cantidadMax: ' + str(cantidadMax))
     logging.debug('[IP] numFragm: ' + str(numFragm) + '\n')
-
+    #NOTA: BORRAR
 
     for i in range(0, numFragm):
 
@@ -402,8 +406,9 @@ def sendIPDatagram(dstIP, data, protocol):
                               myIP,
                               dstIP)
         
+        # NOTA: BORRAR
         logging.debug('------------------------------------------------')
-        logging.debug('[IP] HEADER (%d bytes):' % (len(header)))
+        logging.debug('[IP] HEADER (%d bytes)' % (len(header)))
         logging.debug('* version_ihl : ' + str(version_ihl))
         logging.debug('* tos         : ' + str(DEFAULT_TOS))
         logging.debug('* totalLength : ' + str(totalLength))
@@ -420,7 +425,7 @@ def sendIPDatagram(dstIP, data, protocol):
         logging.debug('[IP] HEADER (checksum = 0):')
         logging.debug(header)
         logging.debug('------------------------------------------------\n')
-
+        # NOTA: BORRAR
 
         # Si existen opciones, lo añadiremos
         if ipOpts is not None:
@@ -435,37 +440,41 @@ def sendIPDatagram(dstIP, data, protocol):
         if ipOpts is not None:
             h += header[IP_MIN_HLEN: IP_MIN_HLEN + len(ipOpts)]
 
+        # NOTA: BORRAR
         logging.debug('------------------------------------------------')
         logging.debug('[IP] HEADER (checksum = %d):' % (checksum))
         logging.debug(h)
         logging.debug('------------------------------------------------\n')
-
+        # NOTA: BORRAR
 
         # Creamos el fragmento/datagrama
         if fragmentar is True:
             fragment = h + data[offset: offset + payload]
+            # NOTA: BORRAR
             logging.debug('------------------------------------------------')
             logging.debug('[IP] FRAGMENT %d (%d bytes):' % (i+1, len(fragment)))
             logging.debug(fragment)
             logging.debug('------------------------------------------------\n')
+            # NOTA: BORRAR
         else:
             datagram = h + data
+            # NOTA: BORRAR
             logging.debug('------------------------------------------------')
             logging.debug('[IP] DATAGRAM (%d bytes):' % (len(datagram)))
             logging.debug(datagram)
             logging.debug('------------------------------------------------\n')
+            # NOTA: BORRAR
 
 
         # Si la direccion IP destino esta en mi subred, enviamos una peticion ARP para obtener la MAC asociada a esa IP
         if dstIP & netmask == myIP & netmask:
-            logging.debug('[IP] ARPResolution(dstIP)')
             dstMac = ARPResolution(dstIP)
         else:
-            logging.debug('[IP] ARPResolution(defaultGW)')
             dstMac = ARPResolution(defaultGW)
 
-
+        # NOTA: BORRAR
         logging.debug('[IP] dstMac: ' + str(dstMac) + '\t------> ' + str(dstMac.hex()) + '\n')
+        # NOTA: BORRAR
 
         # Enviamos el fragmento/datagrama
         if fragmentar is True:
