@@ -51,6 +51,7 @@ def process_UDP_datagram(us, header, data, srcIP):
     dstPort     = datagram_header[1]
     data_octets = data[UDP_HLEN:]
 
+    # Loggear campos
     logging.debug('------------------------------------------------')
     logging.debug('[UDP] DATAGRAM (%d bytes)' % (len(data)))
     logging.debug('* Puerto origen   : ' + str(srcPort))
@@ -90,13 +91,6 @@ def sendUDPDatagram(data, dstPort, dstIP):
                             length,
                             0)
     datagram += bytes(data)
-
-    # NOTA: BORRAR
-    logging.debug('------------------------------------------------')
-    logging.debug('[UDP] DATAGRAM (%d bytes):' % (len(datagram)))
-    logging.debug(datagram)
-    logging.debug('------------------------------------------------\n')
-    # NOTA: BORRAR
 
     ret = sendIPDatagram(dstIP, datagram, UDP_PROTO)
     return ret

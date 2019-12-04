@@ -94,7 +94,7 @@ def processARPRequest(data, MAC):
     srcMac = bytes(data[8: 14]) # Sender Eth(6 Bytes)
 
     if srcMac != MAC:
-        logging.error('[ARP] src != MAC')
+        logging.error('[ARP] srcMac != MAC')
         return
 
     srcIp = bytes(data[14: 18]) # Sender IP (4 Bytes)
@@ -246,8 +246,6 @@ def process_arp_frame(us, header, data, srcMac):
     
     if arpHeader != ARPHeader:
         logging.error('[ARP] No coinciden las cabeceras')
-        logging.error(arpHeader)
-        logging.error(ARPHeader)
         return
 
     # unpack se hace con bytes

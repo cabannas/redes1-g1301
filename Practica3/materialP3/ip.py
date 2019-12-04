@@ -60,7 +60,7 @@ def chksum(msg):
 def getMTU(interface):
     """
         Nombre: getMTU
-        Descripción: Esta función obteiene la MTU para un interfaz dada
+        Descripción: Esta función obtiene la MTU para un interfaz dada
         Argumentos:
             -interface: cadena con el nombre la interfaz sobre la que consultar la MTU
         Retorno: Entero con el valor de la MTU para la interfaz especificada
@@ -168,8 +168,6 @@ def process_IP_datagram(us, header, data, srcMac):
     checksum_calculated = chksum(h)
     if checksum_calculated != checksum_tmp:
         logging.error('[IP] Error de checksum')
-        logging.error(checksum_calculated)
-        logging.error(h)
         return
 
 
@@ -320,8 +318,10 @@ def sendIPDatagram(dstIP, data, protocol):
     # Si existen opciones, sumamos la longitud del campo "opcion" a la cabecera IP
     if ipOpts is not None:
         IHL += len(ipOpts)
+        # NOTA: BORRAR
         logging.debug('[IP] ipOpts (%d bytes): %s' % (len(ipOpts), ipOpts))
-
+        # NOTA: BORRAR
+        
     if IHL > IP_MAX_HLEN:
         return False
 

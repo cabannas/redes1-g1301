@@ -48,18 +48,25 @@ def process_ICMP_message(us, header, data, srcIp):
     # Extraemos primero el valor del checksum y lo guardamos en una variable temporal
     checksum_tmp = struct.unpack('!H', data[2:4])[0]
 
+    # Cambiamos el valor que habia en el campo checksum del mensaje a 0
     message_check_0 = bytes()
     message_check_0 += data[0:2] + struct.pack("!H", 0) + data[4:]
 
+    # Calculamos el checksum y lo comprobamos
     checksum_calculated = chksum(message_check_0)
+    
     if checksum_calculated != checksum_tmp:
         logging.error("[ICMP] Error de checksum")
-        logging.error(checksum_calculated)
-        logging.error(checksum_tmp)
         return
 
-    fmt_string = "!BBHHH"
+    logging.debug('------------------------------------------------')
+    logging.debug('[ICMP] COMPROBANDO CHECKSUM ...')
+    logging.debug('* checksum_tmp       : ' + str(checksum_tmp))
+    logging.debug('* checksum_calculated: ' + str(checksum_calculated))
+    logging.debug('------------------------------------------------\n')
 
+
+    fmt_string = "!BBHHH"
     icmp_header_fields = struct.unpack(fmt_string, data[0:8])
 
     icmp_type       = icmp_header_fields[0]
@@ -68,14 +75,14 @@ def process_ICMP_message(us, header, data, srcIp):
     icmp_identifier = icmp_header_fields[3]
     icmp_seq_num    = icmp_header_fields[4]
 
-    # Loggeamos el valor de tipo y codigo
+    # Loggear campos
     logging.debug('------------------------------------------------')
     logging.debug('[ICMP] MESSAGE (%d bytes)' % (len(data)))
     logging.debug('* Tipo  : ' + str(icmp_type))
     logging.debug('* Codigo: ' + str(icmp_code))
     logging.debug('------------------------------------------------\n')
-    logging.debug(checksum_calculated)
-    logging.debug(checksum_tmp)
+    
+
 
     # Si el tipo es ICMP_ECHO_REQUEST_TYPE
     if icmp_type == ICMP_ECHO_REQUEST_TYPE:
