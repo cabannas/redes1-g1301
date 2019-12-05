@@ -1,0 +1,52 @@
+
+* Autores:
+
+- Daniel Alexander Cabañas González
+- Xingxin Chen Zhan
+
+
+
+* Comentarios a transmitir al profesor:
+
+- En la función "initARP", aunque el enunciado determina que se devuelva 0 ó -1, hemos predecido a devolver True o False, debido a 
+la estructura del programa practica2.py no se ejecuta correctamente si se devuelven los valores numéricos pedidos.
+Sin embargo, tiene un correcto funcionamiento al devolver los tipo booleano.
+
+
+
+* Sección:
+
+- Normativa de entrega cumplida en su totalidad:
+REALIZADO. Hemos entregado correctamente y dentro de los límites de entrega todos los archivos pedidos, cumpliendo así la normativa de entrega.
+
+
+- Fichero leeme.txt bien explicado:
+REALIZADO. Hemos incluido el fichero leeme.txt con una correcta y clara explicación.
+
+
+- Recibir y enviar datagramas UDP sin opciones IP ni fragmentación:
+REALIZADO. Hemos realizado la prueba de envío de datagramas sin opciones IP ni fragmentación listada en el enunciado. Recibimos los datos del envío y los mostramos por terminal a la par que realizamos un control del flujo de información con WireShark, con el cual cotejamos los datos mostrados para ver si son correctos.
+
+
+- Recibir y enviar mensajes ICMP sin opciones IP ni fragmentación (incluyendo pruebas con ping estándar):
+REALIZADO. Hemos realizado la prueba de envío de ICMP sin opciones IP ni fragmentación. Realizamos correctamente tanto el request como el reply, y calculamos RTT correctamente al marcar los respectivos timestamps. Podemos observar 2 mesajes ICMP tipo Reply (uno corresponde con el programa y el otro con el sistema operativo) en WireShark, lo que nos da a entender que el funcionamiento es correcto.
+Al ejecutar la prueba de ping estándar, podemos observar que se generan respuestas duplicadas (DUP!) lo cual nos indica que el programa es correcto y compatible.
+
+
+- Enviar y recibir correctamente mensajes ICMP con opciones IP:
+REALIZADO. Al ejecutar la prueba, y tras monitorizar los datos con WireShark, podemos observar en la trama 32 bytes en IHL (20 bytes de cabecera y 12 bytes de opciones si existen). En WireShark podemos ver que existen 12 bytes de opciones de un timestamp.
+
+
+- Enviar datagramas UDP con fragmentación:
+REALIZADO. Ejecutamos la prueba con un archivo de más de 3000 palabras y MTU de 1500 Bytes, y observamos en los datos impresos por pantalla que el flag de MF está a 1 (existe una fragmentación). Por lo que entendemos que la prueba ha sido superada exitosamente. Tras monitorizar los datos con WireShark podemos observar que se reciben 3 fragmentos (Los 2 primeros tienen el valor de MF a 1 y el tercero a 0), que son reensablados por WireShark (nosotros no reensablamos como se nos indica en el enunciado).
+
+Ahora probamos la prueba con un MTU inferior (658 Bytes): "ifconfig h1-eth0 mtu 658". Tras volver a ejecutar el programa y monitorizar el flujo de información con WireShark, observamos que los paquetes se han fragmentado en 6 paquetes de 658 Bytes con MF a 1 (menos el último que es más pequeño y tiene el MF a 0)
+
+- Enviar datagramas UDP con fragmentación y opciones IP:
+REALIZADO. Probramos el programa con un archivo de más de 3000 palabras y MTU a 1500 otra vez, añadiendo el flag de --addOptions y observamos en la impresión por pantalla que IHL tiene un valor de 32 Bytes. En WireShark podemos observar en los paquetes que existe un campo Options de longitud 12 Bytes con un timestamp. Con esto concluimos que el programa funciona correctamente.
+
+
+- Enviar datagramas UDP fuera de la subred actual:
+REALIZADO. Realizamos la prueba utilizando WireShark para monitorizar el flujo de información. Observamos también (con ifconfig en el nodo raíz que utilizamos para controlar los nodos h1 y h2) la MAC del gateway y comparamos con la MAC destino capturada por WireShark, observando que coinciden y concluyendo que la prueba ha sido superada exitosamente.
+
+
