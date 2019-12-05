@@ -53,6 +53,8 @@ def chksum(msg):
     s = s + (s >> 16)
     s = ~s & 0xffff
 
+    # NOTA: ???
+    s = socket.htons(s)
     return s
 
 
@@ -139,6 +141,10 @@ def process_IP_datagram(us, header, data, srcMac):
     """
     logging.debug('Función implementada: process_IP_datagram\n')
     
+    if '0x0800' not in upperProtos:
+        logging.error('0x0800 no esta registrado')
+        return
+
     # Definimos el formato
     fmt_string = '!BBHHHBBHII'
 
@@ -168,6 +174,8 @@ def process_IP_datagram(us, header, data, srcMac):
     checksum_calculated = chksum(h)
     if checksum_calculated != checksum_tmp:
         logging.error('[IP] Error de checksum')
+        logging.error('checksum_calculated: ' + str(checksum_calculated))
+        logging.error('checksum_tmp       : ' + str(checksum_tmp) + '\n')
         return
 
 
@@ -201,8 +209,9 @@ def process_IP_datagram(us, header, data, srcMac):
     if str(protocol) in protocols:
 
         callback_fun = protocols.get(str(protocol))
+        logging.debug('[IP] callback_fun: ' + str(callback_fun) + '\n')
         if callback_fun is None:
-            logging.error('[IP] Error callbackFun')
+            logging.error('[IP] Error callbackFun\n')
             return
 
         # Llamamos a la funcion de nivel superior
@@ -232,6 +241,7 @@ def registerIPProtocol(callback, protocol):
         Retorno: Ninguno
     """
     protocols[str(protocol)] = callback
+    return
 
 
 

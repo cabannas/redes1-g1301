@@ -77,11 +77,12 @@ def process_Ethernet_frame(us,header,data):
 
     callbackFun = upperProtos.get('0x' + str(ethertype.hex()))
     if callbackFun is None:
-        logging.error('[ENET] Error callbackFun')
+        logging.error('[ENET] Error callbackFun\n')
         return
     
     #Llamamos a la funcion de nivel superiorr
     callbackFun(us, header, data[14:], srcMac)
+    return
     
 
 def process_frame(us,header,data):
@@ -144,6 +145,7 @@ def registerCallback(callback_func, ethertype):
     #upperProtos es el diccionario que relaciona función de callback y ethertype
     logging.debug('Función implementada: registerCallback\n')
     upperProtos[ethertype] = callback_func
+    return
 
 
 def startEthernetLevel(interface):
@@ -170,7 +172,7 @@ def startEthernetLevel(interface):
     except NameError:
         levelInitialized = False
     else:
-        logging.error('[ENET] El nivel Ethernet ya estaba inicializado')
+        logging.error('[ENET] El nivel Ethernet ya estaba inicializado\n')
         return -1
 
 
@@ -179,7 +181,7 @@ def startEthernetLevel(interface):
     handle     = pcap_open_live(interface, ETH_FRAME_MAX, PROMISC, TO_MS, errbuf)
 
     if handle is None:
-        logging.error('[ENET] Error al abrir interfaz')
+        logging.error('[ENET] Error al abrir interfaz\n')
         return -1
 
     #Una vez hemos abierto la interfaz para captura y hemos inicializado las variables globales (macAddress, handle y levelInitialized) arrancamos
@@ -207,7 +209,7 @@ def stopEthernetLevel():
     logging.debug('Función implementada: stopEthernetLevel\n')
 
     if handle is None or recvThread is None:
-        logging.error('[ENET] Error al liberar recursos')
+        logging.error('[ENET] Error al liberar recursos\n')
         return -1
 
     #Liberamos todos los recursos
@@ -256,7 +258,7 @@ def sendEthernetFrame(data,len,etherType,dstMac):
 
     ret = pcap_inject(handle, trama, size)
     if ret == -1:
-        logging.error('[ENET] Error al enviar la trama')
+        logging.error('[ENET] Error al enviar la trama\n')
         return -1
 
     return 0

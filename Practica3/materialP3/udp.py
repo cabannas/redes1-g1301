@@ -58,6 +58,7 @@ def process_UDP_datagram(us, header, data, srcIP):
     logging.debug('* Puerto destino  : ' + str(dstPort))
     logging.debug('* Datos contenidos: ' + str(data_octets))
     logging.debug('------------------------------------------------\n')
+    return
     
 
 
@@ -111,3 +112,4 @@ def initUDP():
     """
     logging.debug('Función implementada: initUDP\n')
     registerIPProtocol(process_UDP_datagram, UDP_PROTO)
+    return

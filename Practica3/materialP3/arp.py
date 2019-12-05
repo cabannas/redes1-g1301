@@ -94,7 +94,7 @@ def processARPRequest(data, MAC):
     srcMac = bytes(data[8: 14]) # Sender Eth(6 Bytes)
 
     if srcMac != MAC:
-        logging.error('[ARP] srcMac != MAC')
+        logging.error('[ARP] srcMac != MAC\n')
         return
 
     srcIp = bytes(data[14: 18]) # Sender IP (4 Bytes)
@@ -106,6 +106,7 @@ def processARPRequest(data, MAC):
 
     resp_a_enviar = createARPReply(IP=struct.unpack('!I', srcIp)[0], MAC=srcMac)
     sendEthernetFrame(data=resp_a_enviar, len=len(resp_a_enviar), etherType=0x0806, dstMac=srcMac)
+    return
 
 
 def processARPReply(data, MAC):
@@ -137,7 +138,7 @@ def processARPReply(data, MAC):
     srcMac = bytes(data[8: 14]) # Sender Eth(6 Bytes)
 
     if srcMac != MAC:
-        logging.error('[ARP] srcMac != MAC')
+        logging.error('[ARP] srcMac != MAC\n')
         return
 
     srcIp  = bytes(data[14: 18])    # Sender IP (4 Bytes)
@@ -238,14 +239,14 @@ def process_arp_frame(us, header, data, srcMac):
     logging.debug('Función implementada: process_arp_frame\n')
 
     if '0x0806' not in upperProtos:
-        logging.error('[ARP] 0x0806 no esta registrado')
+        logging.error('[ARP] 0x0806 no esta registrado\n')
         return
 
     # data es un bytearray, para coger sus campos necesitamos usar la funcion bytes()
     arpHeader = bytes(data[0: ARP_HLEN])    # 6 Bytes
     
     if arpHeader != ARPHeader:
-        logging.error('[ARP] No coinciden las cabeceras')
+        logging.error('[ARP] No coinciden las cabeceras\n')
         return
 
     # unpack se hace con bytes
@@ -279,7 +280,7 @@ def initARP(interface):
     # Realiza una peticion ARP gratuita, para comprobar si la IP propia ya esta asignada o no
     print('\nARP gratuita')
     if ARPResolution(myIP) is not None:
-        logging.error('[ARP] Falla la peticion ARP gratuita, ya esta asignada la propia IP')
+        logging.error('[ARP] Falla la peticion ARP gratuita, ya esta asignada la propia IP\n')
         return False
 
     arpInitialized = True
