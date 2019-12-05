@@ -165,7 +165,7 @@ def process_IP_datagram(us, header, data, srcMac):
     h = data[0: 10] + struct.pack('!H', 0) + data[12: IHL]
 
     # Volvemos a calcular el checksum de la cabecera y lo comprobamos
-    checksum_calculated = chksum(h)
+    checksum_calculated = socket.htons(chksum(h))
     if checksum_calculated != checksum_tmp:
         logging.error('[IP] Checksum incorrecto')
         logging.error('checksum_calculated: ' + str(checksum_calculated))
@@ -407,7 +407,7 @@ def sendIPDatagram(dstIP, data, protocol):
             header += struct.pack('%ds' % (len(ipOpts)), bytes(ipOpts))
 
         # Calculamos el checksum
-        checksum = chksum(header)
+        checksum = socket.htons(chksum(header))
 
         # Creamos la cabecera definitiva, con el checksum calculado
         h = header[0: 10] + struct.pack('!H', checksum) + header[12: IP_MIN_HLEN]

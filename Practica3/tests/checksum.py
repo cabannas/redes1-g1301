@@ -66,7 +66,7 @@ header = struct.pack(fmt_string,
                     d_addr)
 
 
-checksum_calculated = chksum(header)
+checksum_calculated = socket.htons(chksum(header))
 print('\nPaquete creado (checksum=0)')
 print('Calculamos el checksum de la cabecera: ' + str(checksum_calculated))
 
@@ -102,5 +102,5 @@ print('\nCambiamos el valor que habia en el campo checksum de la cabecera a 0')
 header = ip_header[0: 10] + struct.pack('!H', 0) + ip_header[12: 20]
 
 print('\nVolvemos a calcular el checksum de la cabecera y lo comprobamos')
-checksum_calculated = chksum(header)
+checksum_calculated = socket.htons(chksum(header))
 print('checksum_calculated == checksum_tmp: ' + str(checksum_calculated == checksum_tmp) + '\n')
