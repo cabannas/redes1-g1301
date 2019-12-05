@@ -173,7 +173,7 @@ def process_IP_datagram(us, header, data, srcMac):
     # Volvemos a calcular el checksum de la cabecera y lo comprobamos
     checksum_calculated = chksum(h)
     if checksum_calculated != checksum_tmp:
-        logging.error('[IP] Error de checksum')
+        logging.error('[IP] Checksum incorrecto')
         logging.error('checksum_calculated: ' + str(checksum_calculated))
         logging.error('checksum_tmp       : ' + str(checksum_tmp) + '\n')
         return
@@ -209,7 +209,6 @@ def process_IP_datagram(us, header, data, srcMac):
     if str(protocol) in protocols:
 
         callback_fun = protocols.get(str(protocol))
-        logging.debug('[IP] callback_fun: ' + str(callback_fun) + '\n')
         if callback_fun is None:
             logging.error('[IP] Error callbackFun\n')
             return
@@ -217,7 +216,9 @@ def process_IP_datagram(us, header, data, srcMac):
         # Llamamos a la funcion de nivel superior
         callback_fun(us, header, data[IHL:], srcIP)
 
+    return
 
+    
 
 def registerIPProtocol(callback, protocol):
     """

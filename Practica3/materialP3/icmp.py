@@ -56,7 +56,7 @@ def process_ICMP_message(us, header, data, srcIp):
     checksum_calculated = chksum(message_check_0)
     
     if checksum_calculated != checksum_tmp:
-        logging.error("[ICMP] Error de checksum")
+        logging.error("[ICMP] Checksum incorrecto")
         logging.error('checksum_calculated: ' + str(checksum_calculated))
         logging.error('checksum_tmp       : ' + str(checksum_tmp) + '\n')
         return
@@ -89,11 +89,12 @@ def process_ICMP_message(us, header, data, srcIp):
 
     # Si el tipo es ICMP_ECHO_REPLY_TYPE
     elif icmp_type == ICMP_ECHO_REPLY_TYPE:
-
+        
+        tiempo_recepcion = header.ts.tv_sec + header.ts.tv_usec/1000000
         with timeLock:
-            tiempo_recepcion = header.ts.tv_sec + header.ts.tv_usec/1000000
             tiempo_envio = icmp_send_times[(srcIp + icmp_identifier + icmp_seq_num)]
-            resultado = tiempo_recepcion - tiempo_envio        
+        
+        resultado = tiempo_recepcion - tiempo_envio        
 
         print('------------------------------------------------')
         print('[ICMP] RTT')
@@ -153,7 +154,7 @@ def sendICMPMessage(data, type, code, icmp_id, icmp_seqnum, dstIP):
 
     # Comprobar que la longitud es par, si no añadimos un byte a 0 al final
     if len(message_check_0) % 2 != 0:
-        message_check_0 += struct.pack('!B', 0)
+        message_check_0 += struct.pack('B', 0)
 
     # NOTA: BORRAR
     logging.debug('------------------------------------------------')

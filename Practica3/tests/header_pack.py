@@ -67,7 +67,7 @@ if ip_header_primer_campo_no[2] is 42:
     print('Valor correcto: ' + str(ip_header_primer_campo_no[2]) + '\n')
 
 
-ip_header_campo_protocol = struct.unpack('!B', ip_header[9: 10])
+ip_header_campo_protocol = struct.unpack('B', ip_header[9: 10])
 print(ip_header_campo_protocol)
 
 if ip_header_campo_protocol[0] is 6:

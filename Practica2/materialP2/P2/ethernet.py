@@ -268,7 +268,7 @@ def sendEthernetFrame(data,len,etherType,dstMac):
     size = 14 + len
     if size < ETH_FRAME_MIN:
         pad_len = ETH_FRAME_MIN - size
-        trama += struct.pack('!B', 0) * pad_len
+        trama += struct.pack('B', 0) * pad_len
 
     elif size > ETH_FRAME_MAX:
         return -1
