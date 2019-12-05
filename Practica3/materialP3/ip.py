@@ -53,8 +53,6 @@ def chksum(msg):
     s = s + (s >> 16)
     s = ~s & 0xffff
 
-    # NOTA: ???
-    s = socket.htons(s)
     return s
 
 
@@ -151,11 +149,7 @@ def process_IP_datagram(us, header, data, srcMac):
     # Extraer los campos de la cabecera IP
     ip_header = data[0: IP_MIN_HLEN]
     ip_header_fields = struct.unpack(fmt_string, ip_header)
-    
-    # NOTA: BORRAR
-    logging.debug('[IP] ip_header_fields: ' + str(ip_header_fields) + '\n')
-    # NOTA: BORRAR
-    
+  
     # Calcular el checksum
     # Extraemos primero el valor del checksum y lo guardamos en una variable temporal
     checksum_tmp = struct.unpack('!H', ip_header[10: 12])[0]
@@ -218,7 +212,7 @@ def process_IP_datagram(us, header, data, srcMac):
 
     return
 
-    
+
 
 def registerIPProtocol(callback, protocol):
     """
@@ -329,9 +323,7 @@ def sendIPDatagram(dstIP, data, protocol):
     # Si existen opciones, sumamos la longitud del campo "opcion" a la cabecera IP
     if ipOpts is not None:
         IHL += len(ipOpts)
-        # NOTA: BORRAR
-        logging.debug('[IP] ipOpts (%d bytes): %s' % (len(ipOpts), ipOpts))
-        # NOTA: BORRAR
+
         
     if IHL > IP_MAX_HLEN:
         return False
@@ -354,14 +346,6 @@ def sendIPDatagram(dstIP, data, protocol):
         # math.ceil() nos permite redondear un numero hacia arriba, ejemplo: math.ceil(1.1) = 2
         numFragm = math.ceil(totalDatos / cantidadMax)
 
-    
-    # NOTA: BORRAR
-    logging.debug('[IP] datagramLength: ' + str(datagramLength))
-    logging.debug('[IP] MTU: ' + str(MTU))
-    logging.debug('[IP] fragmentar: ' + str(fragmentar))
-    logging.debug('[IP] cantidadMax: ' + str(cantidadMax))
-    logging.debug('[IP] numFragm: ' + str(numFragm) + '\n')
-    #NOTA: BORRAR
 
     for i in range(0, numFragm):
 
@@ -417,26 +401,6 @@ def sendIPDatagram(dstIP, data, protocol):
                               myIP,
                               dstIP)
         
-        # NOTA: BORRAR
-        logging.debug('------------------------------------------------')
-        logging.debug('[IP] HEADER (%d bytes)' % (len(header)))
-        logging.debug('* version_ihl : ' + str(version_ihl))
-        logging.debug('* tos         : ' + str(DEFAULT_TOS))
-        logging.debug('* totalLength : ' + str(totalLength))
-        logging.debug('* id          : ' + str(IPID))
-        logging.debug('* flags_offset: ' + str(flags_offset))
-        logging.debug('* ttl         : ' + str(DEFAULT_TTL))
-        logging.debug('* protocol    : ' + str(protocol))
-        logging.debug('* checksum    : ' + str(0))
-        logging.debug('* myIP        : ' + str(myIP))
-        logging.debug('* dstIP       : ' + str(dstIP))
-        logging.debug('------------------------------------------------\n')
-
-        logging.debug('------------------------------------------------')
-        logging.debug('[IP] HEADER (checksum = 0):')
-        logging.debug(header)
-        logging.debug('------------------------------------------------\n')
-        # NOTA: BORRAR
 
         # Si existen opciones, lo añadiremos
         if ipOpts is not None:
@@ -451,30 +415,12 @@ def sendIPDatagram(dstIP, data, protocol):
         if ipOpts is not None:
             h += header[IP_MIN_HLEN: IP_MIN_HLEN + len(ipOpts)]
 
-        # NOTA: BORRAR
-        logging.debug('------------------------------------------------')
-        logging.debug('[IP] HEADER (checksum = %d):' % (checksum))
-        logging.debug(h)
-        logging.debug('------------------------------------------------\n')
-        # NOTA: BORRAR
 
         # Creamos el fragmento/datagrama
         if fragmentar is True:
             fragment = h + data[offset: offset + payload]
-            # NOTA: BORRAR
-            logging.debug('------------------------------------------------')
-            logging.debug('[IP] FRAGMENT %d (%d bytes):' % (i+1, len(fragment)))
-            logging.debug(fragment)
-            logging.debug('------------------------------------------------\n')
-            # NOTA: BORRAR
         else:
             datagram = h + data
-            # NOTA: BORRAR
-            logging.debug('------------------------------------------------')
-            logging.debug('[IP] DATAGRAM (%d bytes):' % (len(datagram)))
-            logging.debug(datagram)
-            logging.debug('------------------------------------------------\n')
-            # NOTA: BORRAR
 
 
         # Si la direccion IP destino esta en mi subred, enviamos una peticion ARP para obtener la MAC asociada a esa IP
@@ -483,9 +429,6 @@ def sendIPDatagram(dstIP, data, protocol):
         else:
             dstMac = ARPResolution(defaultGW)
 
-        # NOTA: BORRAR
-        logging.debug('[IP] dstMac: ' + str(dstMac) + '\t------> ' + str(dstMac.hex()) + '\n')
-        # NOTA: BORRAR
 
         # Enviamos el fragmento/datagrama
         if fragmentar is True:

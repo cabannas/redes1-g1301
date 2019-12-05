@@ -53,7 +53,7 @@ def process_ICMP_message(us, header, data, srcIp):
     message_check_0 += data[0:2] + struct.pack("!H", 0) + data[4:]
 
     # Calculamos el checksum y lo comprobamos
-    checksum_calculated = chksum(message_check_0)
+    checksum_calculated = socket.htons(chksum(message_check_0))
     
     if checksum_calculated != checksum_tmp:
         logging.error("[ICMP] Checksum incorrecto")
@@ -156,15 +156,9 @@ def sendICMPMessage(data, type, code, icmp_id, icmp_seqnum, dstIP):
     if len(message_check_0) % 2 != 0:
         message_check_0 += struct.pack('B', 0)
 
-    # NOTA: BORRAR
-    logging.debug('------------------------------------------------')
-    logging.debug('[ICMP] MESSAGE (%d bytes)(checksum = %d):' % (len(message_check_0), 0))
-    logging.debug(message_check_0)
-    logging.debug('------------------------------------------------\n')
-    # NOTA: BORRAR
 
     # Calcular el checksum y añadirlo al mensaje donde corresponda
-    check_sum_icmp = chksum(message_check_0)
+    check_sum_icmp = socket.htons(chksum(message_check_0))
 
     # Construir el mensaje definitivo con checksum calculado
     message += message_check_0[0:2] + struct.pack("!H", check_sum_icmp) + message_check_0[4:]
@@ -178,13 +172,6 @@ def sendICMPMessage(data, type, code, icmp_id, icmp_seqnum, dstIP):
 
 
     # Llamar a sendIPDatagram para enviar el mensaje ICMP
-    # NOTA: BORRAR
-    logging.debug('------------------------------------------------')
-    logging.debug('[ICMP] MESSAGE (%d bytes)(checksum = %d):' % (len(message), check_sum_icmp))
-    logging.debug(message)
-    logging.debug('------------------------------------------------\n')
-    # NOTA: BORRAR
-    
     ret = sendIPDatagram(dstIP, message, ICMP_PROTO)
     return ret
 
